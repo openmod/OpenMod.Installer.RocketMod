@@ -8,7 +8,7 @@ on:
         required: true
 jobs:
   deploy:
-    name: "OpenMod Economy Deployment"
+    name: "OpenMod Installer for RocketMod Deployment"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,11 +20,11 @@ jobs:
       with:
         dotnet-version: 3.1.101
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore src/OpenMod.Installer.RocketMod.csproj
     - name: Update version
-      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ github.event.inputs.version }}</Version>#\" OpenMod.Economy/OpenMod.Economy.csproj"  
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ github.event.inputs.version }}</Version>#\" src/OpenMod.Installer.RocketMod.csproj"  
     - name: Build
-      run: dotnet build OpenMod.Economy/OpenMod.Economy.csproj --configuration Release --no-restore
+      run: dotnet build src/OpenMod.Installer.RocketMod.csproj --configuration Release --no-restore
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
