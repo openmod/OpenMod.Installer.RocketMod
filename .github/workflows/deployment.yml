@@ -28,13 +28,13 @@ jobs:
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
-        env:
+      env:
         GITHUB_TOKEN: ${{ github.token }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release v${{ steps.get_version.outputs.VERSION }}
-          draft: false
-          prerelease: false      
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release v${{ steps.get_version.outputs.VERSION }}
+        draft: false
+        prerelease: false      
     - name: Upload release asset
       uses: actions/upload-release-asset@v1
       env:
