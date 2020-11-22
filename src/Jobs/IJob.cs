@@ -1,9 +1,7 @@
-﻿namespace OpenMod.Installer.RocketMod.Migrations
+﻿namespace OpenMod.Installer.RocketMod.Jobs
 {
     public interface IJob
     {
-        string Id { get; }
-
         void ExecuteMigration();
     }
 }

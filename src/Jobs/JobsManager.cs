@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using OpenMod.Installer.RocketMod.Migrations;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
