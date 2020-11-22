@@ -1,10 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using OpenMod.Installer.RocketMod.Jobs;
 using Rocket.Core.Plugins;
+using UnityEngine;
 
 // todo: main command logs
-// Setting OpenMod directory in OpenModManager.WorkingDirectory (see below in load); required for some jobs so they can get the OpenMod folder
 // NuGetInstallJob implementation by using OpenMod.NuGet
 // OpenModInstallJob (download & install OpenMod module; rename RocketMod module to .bak) (Sqidrod)
 // OpenModRocketModUninstallJob (rename RocketMod module to module.bak and rename OpenMod to .bak)
@@ -25,8 +26,14 @@ namespace OpenMod.Installer.RocketMod
             IsOpenModRocketModBridge = AppDomain.CurrentDomain.GetAssemblies().Any(d => d.FullName.Contains("OpenMod.Core"));
 
             Instance = this;
-            
-            OpenModManager = new OpenModManager("todo: find or create openmod directory");
+
+            var openmodPath = Path.Combine(Path.GetPathRoot(Application.dataPath), "Modules", "OpenMod.Unturned");
+            if (!System.IO.Directory.Exists(openmodPath))
+            {
+                System.IO.Directory.CreateDirectory(openmodPath);
+            }
+
+            OpenModManager = new OpenModManager(openmodPath);
             JobsManager = new JobsManager();
 
             JobsManager.RegisterJob(new OpenModCooldownsInstallJob());
