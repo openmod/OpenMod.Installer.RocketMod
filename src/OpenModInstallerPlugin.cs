@@ -3,6 +3,14 @@ using System.Linq;
 using OpenMod.Installer.RocketMod.Jobs;
 using Rocket.Core.Plugins;
 
+// todo: main command logs
+// Setting OpenMod directory in OpenModManager.WorkingDirectory (see below in load); required for some jobs so they can get the OpenMod folder
+// NuGetInstallJob implementation by using OpenMod.NuGet
+// OpenModInstallJob (download & install OpenMod module; rename RocketMod module to .bak) (Sqidrod)
+// OpenModRocketModUninstallJob (rename RocketMod module to module.bak and rename OpenMod to .bak)
+// OpenModPermissionsMigrationJob (migrate permissions, only if PermissionLink will get installed)
+// OpenModUconomyMigrationJob (execute /migrate of OpenMod.Economy after next restart)
+
 namespace OpenMod.Installer.RocketMod
 {
     public class OpenModInstallerPlugin : RocketPlugin
