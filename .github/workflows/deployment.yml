@@ -1,4 +1,4 @@
-name: NuGet Deployment
+name: GitHub Deployment
 
 on:
   workflow_dispatch:
