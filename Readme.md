@@ -1,5 +1,5 @@
 # OpenMod Installer for RocketMod
-This plugin allows you to install RocketMod and migrate to OpenMod with only one command.
+This plugin allows you to install OpenMod and migrate to OpenMod with only one command.
 
 
 # How to use
