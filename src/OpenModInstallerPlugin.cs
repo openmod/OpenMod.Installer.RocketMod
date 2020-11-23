@@ -36,6 +36,7 @@ namespace OpenMod.Installer.RocketMod
             OpenModManager = new OpenModManager(openmodPath);
             JobsManager = new JobsManager();
 
+            JobsManager.RegisterJob(new OpenModModuleInstallJob());
             JobsManager.RegisterJob(new OpenModCooldownsInstallJob());
             JobsManager.RegisterJob(new OpenModEconomyInstallJob());
             JobsManager.RegisterJob(new OpenModPermissionLinkInstallJob());
