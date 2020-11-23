@@ -16,7 +16,7 @@ namespace OpenMod.Installer.RocketMod
             if (!type.HasPreventAttribute())
                 throw new ArgumentException();
             var castedAttribute = (PreventAttribute) type.GetCustomAttribute(typeof(PreventAttribute));
-            return castedAttribute._commandToPrevent;
+            return castedAttribute.CommandToPrevent;
         }
     }
 }

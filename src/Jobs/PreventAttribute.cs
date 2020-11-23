@@ -7,9 +7,9 @@ namespace OpenMod.Installer.RocketMod.Jobs
     {
         public PreventAttribute(string command)
         {
-            _commandToPrevent = command;
+            CommandToPrevent = command;
         }
 
-        public readonly string _commandToPrevent;
+        public readonly string CommandToPrevent;
     }
 }
