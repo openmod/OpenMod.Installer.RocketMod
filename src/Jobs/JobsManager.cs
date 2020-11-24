@@ -73,10 +73,10 @@ namespace OpenMod.Installer.RocketMod.Jobs
                     {
                         if (job.GetType().HasPreventAttribute())
                         {
-                            var preventionFlag = job.GetType().GetPreventionCommand();
-                            if (preventionFlags.Contains(preventionFlag))
+                            var preventionFlagsForThisJob = job.GetType().GetPreventionCommands();
+                            if (preventionFlags.Intersect(preventionFlagsForThisJob).Any())
                             {
-                                Logger.Log($"Recognized {preventionFlag}, preventing reverting of {jobName} because it never happened.");
+                                Logger.Log($"Preventing reverting of {jobName} because it never happened.");
                                 continue;
                             }
                         }
