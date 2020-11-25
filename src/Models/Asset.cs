@@ -1,7 +1,10 @@
-﻿namespace OpenMod.Installer.RocketMod.Models
+﻿using Newtonsoft.Json;
+
+namespace OpenMod.Installer.RocketMod.Models
 {
     public class Asset
     {
-        public string browser_download_url { get; set; }
+        [JsonProperty("browser_download_url")]
+        public string BrowserDownloadUrl { get; set; }
     }
 }

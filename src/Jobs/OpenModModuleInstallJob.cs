@@ -22,7 +22,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
             }
 
             var release = JsonConvert.DeserializeObject<LatestRelease>(releaseData);
-            var downloadLink = release.assets.Find(x => x.browser_download_url.Contains("OpenMod.Unturned.Module"))?.browser_download_url;
+            var downloadLink = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"))?.BrowserDownloadUrl;
             if (downloadLink == null)
             {
                 throw new NullReferenceException(nameof(downloadLink));
