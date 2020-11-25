@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using OpenMod.Installer.RocketMod.Models;
+using Rocket.Core.Logging;
 using SDG.Unturned;
 using System;
 using System.IO;
@@ -8,7 +9,7 @@ using System.Net;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
-    public class OpenModModuleInstallJob : IJob
+    public class OpenModModuleInstallJob : IJob, IRevertable
     {
         public void ExecuteMigration()
         {
@@ -28,7 +29,10 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 throw new NullReferenceException(nameof(downloadLink));
             }
 
+            Logger.Log($"Downloading OpenMod.Unturned.Module..");
             var dataZip = webClient.DownloadData(downloadLink);
+
+            Logger.Log("Extracting..");
             using MemoryStream stream = new MemoryStream(dataZip);
             var zip = ZipStorer.Create(stream);
             foreach (var file in zip.ReadCentralDir())
@@ -44,6 +48,11 @@ namespace OpenMod.Installer.RocketMod.Jobs
             {
                 File.Move(rocketModulePath, renamedRocketModulePath);
             }
+            Logger.Log("Successfully installed OpenMod module.");
+        }
+
+        public void Revert()
+        {
         }
     }
 }
