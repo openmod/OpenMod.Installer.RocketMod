@@ -28,11 +28,6 @@ namespace OpenMod.Installer.RocketMod
             Instance = this;
 
             var openmodPath = Path.Combine(ReadWrite.PATH, "Modules", "OpenMod.Unturned");
-            if (!System.IO.Directory.Exists(openmodPath))
-            {
-                System.IO.Directory.CreateDirectory(openmodPath);
-            }
-
             OpenModManager = new OpenModManager(openmodPath);
             JobsManager = new JobsManager();
 
