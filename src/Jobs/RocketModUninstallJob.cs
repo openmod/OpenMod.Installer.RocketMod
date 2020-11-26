@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
-    public class OpenModRocketModUninstallJob : IJob, IRevertable
+    public class RocketModUninstallJob : IJob, IRevertable
     {
         public void ExecuteMigration()
         {
