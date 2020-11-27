@@ -1,9 +1,8 @@
-﻿using NuGet.Protocol.Core.Types;
-using OpenMod.Installer.RocketMod.Helpers;
+﻿using OpenMod.Installer.RocketMod.Helpers;
 using OpenMod.NuGet;
 using Rocket.Core.Logging;
+using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace OpenMod.Installer.RocketMod.Jobs
@@ -29,34 +28,22 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
             const bool allowPrereleaseVersions = false;
 
-            var packageIdentity = await nuGetPackageManager.GetLatestPackageIdentityAsync(_packageId);
-            var shouldInstallOrUpdate = packageIdentity == null;
-
-            IPackageSearchMetadata pluginPackage = null;
-            if (packageIdentity == null)
+            var pluginPackage = await nuGetPackageManager.QueryPackageExactAsync(_packageId, includePreRelease: allowPrereleaseVersions);
+            if (pluginPackage == null)
             {
-                pluginPackage = await nuGetPackageManager.QueryPackageExactAsync(_packageId, null, allowPrereleaseVersions);
+                Logger.Log($"Downloading has failed for {_packageId}: {NuGetInstallCode.PackageOrVersionNotFound}");
+                return;
             }
-
-            if (packageIdentity != null)
+            var installResult = await nuGetPackageManager.InstallAsync(pluginPackage.Identity, allowPrereleaseVersions);
+            if (installResult.Code == NuGetInstallCode.Success)
             {
-                var availableVersions = await pluginPackage.GetVersionsAsync();
-                shouldInstallOrUpdate = availableVersions.Any(d => d.Version > packageIdentity.Version);
+                _packageDirectory = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.PackagesDirectory,
+                    installResult.Identity.ToString());
+                Logger.Log($"Finished downloading \"{_packageId}\".");
             }
-
-            if (shouldInstallOrUpdate)
+            else
             {
-                var installResult = await nuGetPackageManager.InstallAsync(pluginPackage.Identity, allowPrereleaseVersions);
-                if (installResult.Code == NuGetInstallCode.Success)
-                {
-                    _packageDirectory = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.PackagesDirectory,
-                        installResult.Identity.ToString());
-                    Logger.Log($"Finished downloading \"{_packageId}\".");
-                }
-                else
-                {
-                    Logger.Log($"Downloading has failed for {pluginPackage.Identity.Id} v{pluginPackage.Identity.Version.OriginalVersion}: {installResult.Code}");
-                }
+                Logger.Log($"Downloading has failed for {pluginPackage.Identity.Id} v{pluginPackage.Identity.Version.OriginalVersion}: {installResult.Code}");
             }
         }
 

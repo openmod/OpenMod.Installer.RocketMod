@@ -1,4 +1,5 @@
 ﻿using OpenMod.Installer.RocketMod.Jobs;
+using OpenMod.Installer.RocketMod.Jobs.OpenModPackagesInstallJobs;
 using Rocket.Core.Plugins;
 using SDG.Unturned;
 using System;
@@ -33,6 +34,8 @@ namespace OpenMod.Installer.RocketMod
             JobsManager.RegisterJob(new OpenModModuleInstallJob());
             JobsManager.RegisterJob(new RocketModUninstallJob());
             JobsManager.RegisterJob(new AssemblyLoadJob());
+            JobsManager.RegisterJob(new OpenModUnturnedInstallJob());
+            JobsManager.RegisterJob(new OpenModUnityEngineInstallJob());
             JobsManager.RegisterJob(new OpenModCooldownsInstallJob());
             JobsManager.RegisterJob(new OpenModEconomyInstallJob());
             JobsManager.RegisterJob(new OpenModPermissionLinkInstallJob());
