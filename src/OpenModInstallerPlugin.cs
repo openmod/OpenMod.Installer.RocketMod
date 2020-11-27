@@ -1,13 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using OpenMod.Installer.RocketMod.Jobs;
+﻿using OpenMod.Installer.RocketMod.Jobs;
 using Rocket.Core.Plugins;
 using SDG.Unturned;
-using UnityEngine;
+using System;
+using System.IO;
+using System.Linq;
 
 // todo: main command logs
-// NuGetInstallJob implementation by using OpenMod.NuGet
 // OpenModRocketModUninstallJob (rename RocketMod module to module.bak and rename OpenMod to .bak)
 // OpenModPermissionsMigrationJob (migrate permissions, only if PermissionLink will get installed)
 // OpenModUconomyMigrationJob (execute /migrate of OpenMod.Economy after next restart)
@@ -32,7 +30,8 @@ namespace OpenMod.Installer.RocketMod
             JobsManager = new JobsManager();
 
             JobsManager.RegisterJob(new OpenModModuleInstallJob());
-            JobsManager.RegisterJob(new OpenModRocketModUninstallJob());
+            JobsManager.RegisterJob(new RocketModUninstallJob());
+            JobsManager.RegisterJob(new AssemblyLoadJob());
             JobsManager.RegisterJob(new OpenModCooldownsInstallJob());
             JobsManager.RegisterJob(new OpenModEconomyInstallJob());
             JobsManager.RegisterJob(new OpenModPermissionLinkInstallJob());
