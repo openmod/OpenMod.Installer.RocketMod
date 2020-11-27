@@ -1,8 +1,8 @@
-﻿using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
+﻿using NuGet.Protocol.Core.Types;
 using OpenMod.Installer.RocketMod.Helpers;
 using OpenMod.NuGet;
 using Rocket.Core.Logging;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,7 +11,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
     public abstract class NuGetInstallJob : IJob, IRevertable
     {
         private readonly string _packageId;
-        private PackageIdentity _packageIdentity;
+        private string _packageDirectory;
 
         protected NuGetInstallJob(string packageId)
         {
@@ -49,7 +49,8 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 var installResult = await nuGetPackageManager.InstallAsync(pluginPackage.Identity, allowPrereleaseVersions);
                 if (installResult.Code == NuGetInstallCode.Success)
                 {
-                    _packageIdentity = installResult.Identity;
+                    _packageDirectory = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.PackagesDirectory,
+                        installResult.Identity.ToString());
                     Logger.Log($"Finished downloading \"{_packageId}\".");
                 }
                 else
@@ -61,13 +62,11 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
         public void Revert()
         {
-            if(_packageIdentity == null)
+            if (string.IsNullOrEmpty(_packageDirectory) || !Directory.Exists(_packageDirectory))
             {
                 return;
             }
-
-            var nuGetPackageManager = NuGetHelper.GetNuGetPackageManager();
-            AsyncHelper.RunSync(() => nuGetPackageManager.RemoveAsync(_packageIdentity));
+            Directory.Delete(_packageDirectory, true);
         }
     }
 }

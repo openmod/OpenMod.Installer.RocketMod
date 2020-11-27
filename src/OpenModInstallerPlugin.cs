@@ -26,7 +26,8 @@ namespace OpenMod.Installer.RocketMod
             Instance = this;
 
             var openmodPath = Path.Combine(ReadWrite.PATH, "Modules", "OpenMod.Unturned");
-            OpenModManager = new OpenModManager(openmodPath);
+            var packagesPath = Path.Combine(ReadWrite.PATH, "Servers", Provider.serverID, "OpenMod", "packages");
+            OpenModManager = new OpenModManager(openmodPath, packagesPath);
             JobsManager = new JobsManager();
 
             JobsManager.RegisterJob(new OpenModModuleInstallJob());

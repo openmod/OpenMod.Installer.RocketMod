@@ -1,7 +1,5 @@
 ﻿using OpenMod.NuGet;
-using SDG.Unturned;
 using System;
-using System.IO;
 
 namespace OpenMod.Installer.RocketMod.Helpers
 {
@@ -15,7 +13,7 @@ namespace OpenMod.Installer.RocketMod.Helpers
                 return NuGetPackageManager;
             }
 
-            var path = Path.Combine(ReadWrite.PATH, "Servers", Provider.serverID, "OpenMod", "packages");
+            var path = OpenModInstallerPlugin.Instance.OpenModManager.PackagesDirectory;
             Environment.SetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA", path);
 
             // NuGetPackageManager should auto create directory
