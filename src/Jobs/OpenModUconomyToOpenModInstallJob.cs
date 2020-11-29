@@ -3,7 +3,7 @@
     [Prevent("--no-uconomy-link")]
     public class OpenModUconomyToOpenModInstallJob : NuGetInstallJob
     {
-        public OpenModUconomyToOpenModInstallJob() : base("OpenMod.Unturned.UconomyToOpenMod")
+        public OpenModUconomyToOpenModInstallJob() : base("OpenMod.UconomyToOpenMod")
         {
         }
     }

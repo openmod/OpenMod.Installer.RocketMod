@@ -1,7 +1,6 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using OpenMod.Installer.RocketMod.Models;
 using Rocket.Core.Logging;
-using SDG.Unturned;
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -13,46 +12,46 @@ namespace OpenMod.Installer.RocketMod.Jobs
     {
         public void ExecuteMigration()
         {
-            var webClient = new WebClient();
+            using var webClient = new WebClient();
             webClient.Headers.Add("User-Agent", "request");
-
             var releaseData = webClient.DownloadString("https://api.github.com/repos/openmod/openmod/releases/latest");
-            if (string.IsNullOrEmpty(releaseData))
-            {
-                throw new NullReferenceException("GitHub API returns empty request");
-            }
-
             var release = JsonConvert.DeserializeObject<LatestRelease>(releaseData);
-            var downloadLink = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"))?.BrowserDownloadUrl;
-            if (downloadLink == null)
+
+            //this can never be empty UNLESS troja posts a release without Module
+            var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"));
+            Logger.Log($"Downloading {moduleAsset.AssetName}");
+            var dataZip = webClient.DownloadData(moduleAsset.BrowserDownloadUrl);
+            Logger.Log("Extracting..");
+            var modulesDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory;
+            ExtractArchive(dataZip, modulesDirectory);
+            Logger.Log("Successfully installed OpenMod module.");
+        }
+
+        //There can be a long talk about this made to be universal while actually not being universal.
+        public void ExtractArchive(byte[] archive, string directory)
+        {
+            if (!Directory.Exists(directory))
             {
-                throw new NullReferenceException(nameof(downloadLink));
+                Directory.CreateDirectory(directory);
             }
 
-            Logger.Log($"Downloading OpenMod.Unturned.Module..");
-            var dataZip = webClient.DownloadData(downloadLink);
-
-            Logger.Log("Extracting..");
-            using MemoryStream stream = new MemoryStream(dataZip);
+            // ZipStorer dispose is broken, so using instead memoryStream dispose
+            using var stream = new MemoryStream(archive);
             var zip = ZipStorer.Create(stream);
             foreach (var file in zip.ReadCentralDir())
             {
-                var path = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory,
-                    Path.GetFileName(file.FilenameInZip));
+                //We dont want to leave the readme in the Modules folder do we?
+                if (file.FilenameInZip == "Readme.txt")
+                    continue;
+                var path = Path.Combine(directory, Path.GetFileName(file.FilenameInZip));
                 zip.ExtractFile(file, path);
             }
-
-            var rocketModulePath = Path.Combine(ReadWrite.PATH, "Modules", "Rocket.Unturned", "Rocket.Unturned.module");
-            var renamedRocketModulePath = Path.Combine(ReadWrite.PATH, "Modules", "Rocket.Unturned", "Rocket.Unturned.module.bak");
-            if(File.Exists(rocketModulePath))
-            {
-                File.Move(rocketModulePath, renamedRocketModulePath);
-            }
-            Logger.Log("Successfully installed OpenMod module.");
         }
 
         public void Revert()
         {
+            if (Directory.Exists(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory))
+                Directory.Delete(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory, true);
         }
     }
 }
