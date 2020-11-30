@@ -38,7 +38,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
                     DisplayName = permission.DisplayName,
                     IsAutoAssigned = permission.Id.Equals(rocketPermissions.DefaultGroup, StringComparison.OrdinalIgnoreCase),
                     Parents = new HashSet<string> { permission.ParentGroup },
-                    Permissions = new HashSet<string>(permission.Permissions.Select(c => c.Name)),
+                    Permissions = new HashSet<string>(permission.Permissions.Select(c => "Rocket.PermissionLink:" + c.Name)),
                     Priority = permission.Priority
                 });
             }
