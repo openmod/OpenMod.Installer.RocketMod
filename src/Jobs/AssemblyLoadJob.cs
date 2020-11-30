@@ -18,11 +18,11 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 _assemblyResolveInstalled = true;
             }
 
-            foreach (var file in Directory.GetFiles(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory))
+            foreach (var file in Directory.GetFiles(OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory))
             {
                 if (file.EndsWith(".dll"))
                 {
-                    var dllPath = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory, file);
+                    var dllPath = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory, file);
                     var asm = Assembly.Load(File.ReadAllBytes(dllPath));
 
                     var name = Extensions.GetVersionIndependentName(asm.FullName, out _);

@@ -43,13 +43,12 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 });
             }
 
-            var workingDirectory = Path.Combine(ReadWrite.PATH, "Servers", Provider.serverID, "OpenMod");
             var datastore = new YamlDataStore(new DataStoreCreationParameters
             {
                 ComponentId = "OpenMod.Core",
                 Prefix = "openmod",
                 Suffix = null,
-                WorkingDirectory = workingDirectory
+                WorkingDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory
             });
 
             AsyncHelper.RunSync(() => datastore.SaveAsync("roles", openmodRoles));
@@ -57,10 +56,10 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
         public void Revert()
         {
-            var openmodRolesPath = Path.Combine(ReadWrite.PATH, "Servers", Provider.serverID, "OpenMod", "openmod.roles.yaml");
-            if(File.Exists(openmodRolesPath))
+            var path = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory + "/openmod.roles.yaml";
+            if (File.Exists(path))
             {
-                File.Delete(openmodRolesPath);
+                File.Delete(path);
             }
         }
     }

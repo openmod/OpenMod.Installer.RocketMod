@@ -2,13 +2,13 @@
 {
     public class OpenModManager
     {
-        public OpenModManager(string workingDirectory, string packagesDirectory)
+        public OpenModManager(string workingDirectory, string moduleDirectory)
         {
             WorkingDirectory = workingDirectory;
-            PackagesDirectory = packagesDirectory;
+            ModuleDirectory = moduleDirectory;
         }
 
         public string WorkingDirectory { get; } // gets the openmod directory
-        public string PackagesDirectory { get; }
+        public string ModuleDirectory { get; } // gets the openmod module directory
     }
 }
