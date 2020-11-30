@@ -8,7 +8,6 @@ using System.Linq;
 
 // todo: main command logs
 // OpenModRocketModUninstallJob (rename RocketMod module to module.bak and rename OpenMod to .bak)
-// OpenModPermissionsMigrationJob (migrate permissions, only if PermissionLink will get installed)
 // OpenModUconomyMigrationJob (execute /migrate of OpenMod.Economy after next restart)
 
 namespace OpenMod.Installer.RocketMod
@@ -42,6 +41,7 @@ namespace OpenMod.Installer.RocketMod
             JobsManager.RegisterJob(new OpenModPermissionsExInstallJob());
             JobsManager.RegisterJob(new OpenModRocketModBridgeInstallJob());
             JobsManager.RegisterJob(new OpenModUconomyToOpenModInstallJob());
+            JobsManager.RegisterJob(new MigratePermissionsJob());
 
             base.Load();
         }
