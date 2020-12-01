@@ -44,7 +44,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
                     },
                     DisplayName = group.DisplayName,
                     IsAutoAssigned = group.Id.Equals(rocketPermissions.DefaultGroup, StringComparison.OrdinalIgnoreCase),
-                    Parents = new HashSet<string> { group.ParentGroup },
+                    Parents = new HashSet<string> { group.ParentGroup ?? string.Empty }, // in rocket default id parameter ParentGroup is null
                     Permissions = new HashSet<string>(group.Permissions.Select(c => "Rocket.PermissionLink:" + c.Name)),
                     Priority = group.Priority
                 });
@@ -52,13 +52,13 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
             var datastore = new YamlDataStore(new DataStoreCreationParameters
             {
-                ComponentId = "OpenMod.Core",
+                ComponentId = null, // ComponentId is never used in YamlDataStore lol
                 Prefix = "openmod",
                 Suffix = null,
                 WorkingDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory
             });
 
-            AsyncHelper.RunSync(() => datastore.SaveAsync("roles", openmodRoles));
+            AsyncHelper.RunSync(async () => await datastore.SaveAsync("roles", openmodRoles));
         }
 
         public void Revert()
@@ -70,7 +70,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
             }
         }
 
-        private static HashSet<CooldownSpan> GetCooldowns(List<Permission> permissions)
+        private HashSet<CooldownSpan> GetCooldowns(List<Permission> permissions)
         {
             var cooldowns = new HashSet<CooldownSpan>();
             foreach (var permission in permissions)
