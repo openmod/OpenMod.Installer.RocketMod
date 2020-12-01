@@ -1,7 +1,6 @@
 ﻿using OpenMod.Installer.RocketMod.Helpers;
 using OpenMod.NuGet;
 using Rocket.Core.Logging;
-using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -37,7 +36,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
             var installResult = await nuGetPackageManager.InstallAsync(pluginPackage.Identity, allowPrereleaseVersions);
             if (installResult.Code == NuGetInstallCode.Success)
             {
-                _packageDirectory = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.PackagesDirectory,
+                _packageDirectory = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory, "packages",
                     installResult.Identity.ToString());
                 Logger.Log($"Finished downloading \"{_packageId}\".");
             }

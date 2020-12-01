@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Rocket.API;
+﻿using Rocket.API;
 using Rocket.Core.Logging;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenMod.Installer.RocketMod.Commands
 {
@@ -9,7 +9,7 @@ namespace OpenMod.Installer.RocketMod.Commands
     {
         public void Execute(IRocketPlayer caller, string[] command)
         {
-            if (command.Length == 0 || command[0].ToLower() != "install")
+            if (command.Length == 0 || !string.Equals(command[0], "install", System.StringComparison.OrdinalIgnoreCase))
             {
                 Logger.Log("Unsupported syntax. Use /openmod install [flags]");
                 return;
@@ -22,7 +22,6 @@ namespace OpenMod.Installer.RocketMod.Commands
             }
 
             var flags = command.Skip(1).Select(x => x.ToLower());
-            
             OpenModInstallerPlugin.Instance.JobsManager.Migrate(flags.ToArray());
         }
 

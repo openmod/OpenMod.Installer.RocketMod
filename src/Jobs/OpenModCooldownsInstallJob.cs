@@ -3,7 +3,7 @@
     [Prevent("--no-extras")]
     public class OpenModCooldownsInstallJob : NuGetInstallJob
     {
-        public OpenModCooldownsInstallJob() : base("OpenMod.Cooldowns")
+        public OpenModCooldownsInstallJob() : base("OpenMod.Cooldowns.Rocket")
         {
         }
     }

@@ -13,7 +13,7 @@ namespace OpenMod.Installer.RocketMod.Helpers
                 return NuGetPackageManager;
             }
 
-            var path = OpenModInstallerPlugin.Instance.OpenModManager.PackagesDirectory;
+            var path = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory + "/packages";
             Environment.SetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA", path);
 
             // NuGetPackageManager should auto create directory

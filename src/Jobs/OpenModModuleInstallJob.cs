@@ -22,7 +22,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
             Logger.Log($"Downloading {moduleAsset.AssetName}");
             var dataZip = webClient.DownloadData(moduleAsset.BrowserDownloadUrl);
             Logger.Log("Extracting..");
-            var modulesDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory;
+            var modulesDirectory = OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory;
             ExtractArchive(dataZip, modulesDirectory);
             Logger.Log("Successfully installed OpenMod module.");
         }
@@ -50,8 +50,8 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
         public void Revert()
         {
-            if (Directory.Exists(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory))
-                Directory.Delete(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory, true);
+            if (Directory.Exists(OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory))
+                Directory.Delete(OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory, true);
         }
     }
 }
