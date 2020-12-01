@@ -78,7 +78,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 cooldowns.Add(new CooldownSpan
                 {
                     Command = "rocket." + permission.Name,
-                    Cooldown = permission.Cooldown.ToString()
+                    Cooldown = $"{permission.Cooldown} seconds"
                 });
             }
             return cooldowns;
