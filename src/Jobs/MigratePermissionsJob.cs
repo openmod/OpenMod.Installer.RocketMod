@@ -2,6 +2,7 @@
 using OpenMod.Core.Permissions.Data;
 using OpenMod.Core.Persistence;
 using OpenMod.Installer.RocketMod.Helpers;
+using OpenMod.Installer.RocketMod.Models;
 using Rocket.API.Serialisation;
 using SDG.Unturned;
 using System;
@@ -29,17 +30,23 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 Roles = new List<PermissionRoleData>()
             };
 
-            foreach (var permission in rocketPermissions.Groups)
+            foreach (var group in rocketPermissions.Groups)
             {
                 openmodRoles.Roles.Add(new PermissionRoleData
                 {
-                    Id = permission.Id,
-                    Data = new Dictionary<string, object>(),
-                    DisplayName = permission.DisplayName,
-                    IsAutoAssigned = permission.Id.Equals(rocketPermissions.DefaultGroup, StringComparison.OrdinalIgnoreCase),
-                    Parents = new HashSet<string> { permission.ParentGroup },
-                    Permissions = new HashSet<string>(permission.Permissions.Select(c => "Rocket.PermissionLink:" + c.Name)),
-                    Priority = permission.Priority
+                    Id = group.Id,
+                    Data = new Dictionary<string, object>
+                    {
+                        { "color", group.Color },
+                        { "prefix", group.Prefix },
+                        { "suffix", group.Suffix },
+                        { "cooldowns", GetCooldowns(group.Permissions) }
+                    },
+                    DisplayName = group.DisplayName,
+                    IsAutoAssigned = group.Id.Equals(rocketPermissions.DefaultGroup, StringComparison.OrdinalIgnoreCase),
+                    Parents = new HashSet<string> { group.ParentGroup },
+                    Permissions = new HashSet<string>(group.Permissions.Select(c => "Rocket.PermissionLink:" + c.Name)),
+                    Priority = group.Priority
                 });
             }
 
@@ -61,6 +68,20 @@ namespace OpenMod.Installer.RocketMod.Jobs
             {
                 File.Delete(path);
             }
+        }
+
+        private static HashSet<CooldownSpan> GetCooldowns(List<Permission> permissions)
+        {
+            var cooldowns = new HashSet<CooldownSpan>();
+            foreach (var permission in permissions)
+            {
+                cooldowns.Add(new CooldownSpan
+                {
+                    Command = "rocket." + permission.Name,
+                    Cooldown = permission.Cooldown.ToString()
+                });
+            }
+            return cooldowns;
         }
     }
 }
