@@ -12,8 +12,6 @@ using System;
 using System.IO;
 using System.Linq;
 
-// todo: main command logs
-
 namespace OpenMod.Installer.RocketMod
 {
     public class OpenModInstallerPlugin : RocketPlugin
@@ -48,6 +46,7 @@ namespace OpenMod.Installer.RocketMod
                 JobsManager.RegisterJob(new OpenModRocketModBridgeInstallJob());
                 JobsManager.RegisterJob(new OpenModUconomyToOpenModInstallJob());
                 JobsManager.RegisterJob(new MigratePermissionsJob());
+                JobsManager.RegisterJob(new FileCreateJob());
             }
             else
             {
@@ -55,7 +54,7 @@ namespace OpenMod.Installer.RocketMod
                 JobsManager.RegisterJob(new RocketModInstallJob());
             }
 
-            if (IsOpenModRocketModBridge)
+            if (IsOpenModRocketModBridge && File.Exists(Path.GetTempPath() + "/openmod-unturned"))
             {
                 var module = OpenModUnturnedModuleHelper.GetOpenModModule();
                 var runtime = (IRuntime)module.OpenModRuntime;
@@ -64,6 +63,8 @@ namespace OpenMod.Installer.RocketMod
                 AsyncHelper.RunSync(() => runtime.LifetimeScope.Resolve<ICommandExecutor>()
                     .ExecuteAsync(new ConsoleActor(logger, "openmod-unturned"),
                         new string[] { "migrateuconomy" }, null));
+
+                File.Delete(Path.GetTempPath() + "/openmod-unturned");
             }
 
             base.Load();
