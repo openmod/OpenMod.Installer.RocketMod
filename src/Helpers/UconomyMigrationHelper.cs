@@ -15,11 +15,19 @@ namespace OpenMod.Installer.RocketMod.Helpers
             var runtime = (IRuntime)module.OpenModRuntime;
             var logger = runtime.LifetimeScope.Resolve<ILoggerFactory>().CreateLogger<ConsoleActor>();
 
-            AsyncHelper.RunSync(() => runtime.LifetimeScope.Resolve<ICommandExecutor>()
-                .ExecuteAsync(new ConsoleActor(logger, "openmod-unturned"),
-                    new string[] { "migrateuconomy" }, null));
+            var isExecuted = false;
+            AsyncHelper.RunSync(async () =>
+            {
+                var commandContext = await runtime.LifetimeScope.Resolve<ICommandExecutor>()
+                    .ExecuteAsync(new ConsoleActor(logger, "openmod-unturned"), new string[] { "migrateuconomy" }, null);
 
-            File.Delete(Path.GetTempPath() + "/openmod-unturned");
+                isExecuted = commandContext.Exception == null;
+            });
+
+            if (isExecuted)
+            {
+                File.Delete(Path.GetTempPath() + "/openmod-unturned");
+            }
         }
     }
 }
