@@ -1,9 +1,4 @@
-﻿using Autofac;
-using Microsoft.Extensions.Logging;
-using OpenMod.API;
-using OpenMod.API.Commands;
-using OpenMod.Core.Console;
-using OpenMod.Installer.RocketMod.Helpers;
+﻿using OpenMod.Installer.RocketMod.Helpers;
 using OpenMod.Installer.RocketMod.Jobs;
 using OpenMod.Installer.RocketMod.Jobs.OpenModPackagesInstallJobs;
 using Rocket.Core.Plugins;
@@ -56,15 +51,7 @@ namespace OpenMod.Installer.RocketMod
 
             if (IsOpenModRocketModBridge && File.Exists(Path.GetTempPath() + "/openmod-unturned"))
             {
-                var module = OpenModUnturnedModuleHelper.GetOpenModModule();
-                var runtime = (IRuntime)module.OpenModRuntime;
-                var logger = runtime.LifetimeScope.Resolve<ILoggerFactory>().CreateLogger<ConsoleActor>();
-
-                AsyncHelper.RunSync(() => runtime.LifetimeScope.Resolve<ICommandExecutor>()
-                    .ExecuteAsync(new ConsoleActor(logger, "openmod-unturned"),
-                        new string[] { "migrateuconomy" }, null));
-
-                File.Delete(Path.GetTempPath() + "/openmod-unturned");
+                UconomyMigrationHelper.Migrate();
             }
 
             base.Load();
