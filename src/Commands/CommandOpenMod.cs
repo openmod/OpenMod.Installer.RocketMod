@@ -1,5 +1,6 @@
 ﻿using Rocket.API;
 using Rocket.Core.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,15 +10,22 @@ namespace OpenMod.Installer.RocketMod.Commands
     {
         public void Execute(IRocketPlayer caller, string[] command)
         {
-            if (command.Length == 0 || !string.Equals(command[0], "install", System.StringComparison.OrdinalIgnoreCase))
+            var isOpenmod = OpenModInstallerPlugin.Instance.IsOpenModRocketModBridge;
+            if(command.Length == 0 || (!string.Equals(command[0], "uninstall", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(command[0], "install", StringComparison.OrdinalIgnoreCase)))
             {
-                Logger.Log("Unsupported syntax. Use /openmod install [flags]");
+                Logger.Log($"Unsupported syntax. Use /openmod {(isOpenmod ? "uninstall" : "install")} [flags]");
                 return;
             }
 
-            if (OpenModInstallerPlugin.Instance.IsOpenModRocketModBridge)
+            if(!isOpenmod && string.Equals(command[0], "uninstall", StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Log("You are already running OpenMod.");
+                Logger.Log("OpenMod is not installed!");
+                return;
+            }
+            else if (isOpenmod && string.Equals(command[0], "install", StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.Log("OpenMod already installed!");
                 return;
             }
 
@@ -28,7 +36,7 @@ namespace OpenMod.Installer.RocketMod.Commands
         public AllowedCaller AllowedCaller { get; } = AllowedCaller.Console;
         public string Name { get; } = "openmod";
         public string Help { get; } = "Installs OpenMod";
-        public string Syntax { get; } = "<install>";
+        public string Syntax { get; } = "<install|uninstall>";
         public List<string> Aliases { get; } = new List<string>();
         public List<string> Permissions { get; } = new List<string>();
     }
