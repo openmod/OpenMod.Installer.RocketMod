@@ -17,12 +17,12 @@ namespace OpenMod.Installer.RocketMod.Commands
             new CommandStepChoice
             {
                 Name = "RocketMod (recommended)",
-                Value = "OpenMod will use RocketMod's Permissions.config.xml for permissions."
+                Description = "OpenMod will use RocketMod's Permissions.config.xml for permissions."
             },
             new CommandStepChoice
             {
                 Name = "OpenMod",
-                Value = "RocketMod will use OpenMod's permission system. Will import existing permissions from RocketMod's Permissions.config.xml."
+                Description = "RocketMod will use OpenMod's permission system. Will import existing permissions from RocketMod's Permissions.config.xml."
             }
         };
 
@@ -30,14 +30,17 @@ namespace OpenMod.Installer.RocketMod.Commands
         {
             switch (choice.ToLowerInvariant())
             {
-                case "RocketMod":
-                    break;
-                case "OpenMod":
+                case "rm":
+                case "rocket":
+                case "rocketmod":
+                    return;
+                case "om":
+                case "openmod":
                     Jobs.Add(new MigratePermissionsJob());
-                    break;
+                    return;
             }
 
-            throw new InvalidOperationException();
+            throw new InvalidChoiceException(choice);
         }
     }
 }

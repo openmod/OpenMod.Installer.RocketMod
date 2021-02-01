@@ -3,6 +3,7 @@ using Rocket.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using OpenMod.Installer.RocketMod.Jobs;
 using SDG.Unturned;
 
@@ -11,6 +12,7 @@ namespace OpenMod.Installer.RocketMod.Commands
     public class CommandOpenMod : IRocketCommand
     {
         private static readonly List<IJob> s_Jobs = new List<IJob>();
+        private static readonly List<CommandWindowInputted> s_RocketModComandWindowsDelegates = new List<CommandWindowInputted>();
         private static CommandStep s_CurrentStep;
 
         public void Execute(IRocketPlayer caller, string[] command)
@@ -35,8 +37,9 @@ namespace OpenMod.Installer.RocketMod.Commands
             }
 
             Reset();
-            Logger.Log("Starting OpenMod installation.");
-            Logger.Log("Type \"cancel\" to cancel installation.");
+            Logger.Log("Starting OpenMod installation..", ConsoleColor.DarkCyan);
+            Logger.Log("Visit https://openmod.github.io/openmod-docs for information.", ConsoleColor.DarkCyan);
+            Logger.Log("Type \"cancel\" to cancel.", ConsoleColor.Cyan);
 
             BindCommandInput();
 
@@ -50,20 +53,23 @@ namespace OpenMod.Installer.RocketMod.Commands
         private void BindCommandInput()
         {
             CommandWindow.onCommandWindowInputted += OnCommandWindowInputted;
+            RemoveRocketModConsoleInput();
         }
 
         private void UnbindCommandInput()
         {
             CommandWindow.onCommandWindowInputted -= OnCommandWindowInputted;
+            RestoreRocketModConsoleInput();
         }
 
         private void OnCommandWindowInputted(string text, ref bool shouldexecutecommand)
         {
+            shouldexecutecommand = false;
             text = text.Trim();
 
             if (text.Equals("cancel", StringComparison.OrdinalIgnoreCase))
             {
-                Logger.Log("Aborting OpenMod installation.");
+                Logger.Log("OpenMod installation aborted.", ConsoleColor.DarkRed);
                 Reset();
                 return;
             }
@@ -77,29 +83,90 @@ namespace OpenMod.Installer.RocketMod.Commands
                 {
                     PerformMigration();
                 }
+                else
+                {
+                    PrintStep(s_CurrentStep);
+                }
             }
-            catch (InvalidOperationException)
+            catch (InvalidChoiceException ex)
             {
-                Logger.Log($"Invalid choice: {text}.");
+                Logger.Log($"Invalid choice: {ex.Choice}. Type \"cancel\" to cancel OpenMod installation.", ConsoleColor.Red);
                 PrintStep(s_CurrentStep);
             }
-        }
-
-        private void PerformMigration()
-        {
-            JobsExecutor.Execute(s_Jobs);
-            Reset();
         }
 
         private void PrintStep(CommandStep step)
         {
             Logger.Log(string.Empty);
-            Logger.Log(step.Text);
+            Logger.Log(step.Text, ConsoleColor.DarkCyan);
 
             foreach (var choice in step.Choices)
             {
-                Logger.Log($"  {choice.Name}: {choice.Description}");
+                Logger.Log($"  {choice.Name}: {choice.Description}", ConsoleColor.Cyan);
             }
+        }
+
+        private void PerformMigration()
+        {
+            try
+            {
+                JobsExecutor.Execute(s_Jobs);
+            }
+            finally
+            {
+                Reset();
+            }
+        }
+
+        private void RemoveRocketModConsoleInput()
+        {
+            if (s_RocketModComandWindowsDelegates.Any())
+            {
+                return;
+            }
+
+            var commandWindowInputedInvocationList = CommandWindow.onCommandWindowInputted.GetInvocationList();
+            foreach (var @delegate in commandWindowInputedInvocationList)
+            {
+                if (!IsRocketModDelegate(@delegate))
+                {
+                    continue;
+                }
+
+                var rocketModDelegate = (CommandWindowInputted)@delegate;
+                CommandWindow.onCommandWindowInputted -= rocketModDelegate;
+                s_RocketModComandWindowsDelegates.Add(rocketModDelegate);
+            }
+        }
+
+        private void RestoreRocketModConsoleInput()
+        {
+            foreach (var rocketModDelegate in s_RocketModComandWindowsDelegates)
+            {
+                CommandWindow.onCommandWindowInputted += rocketModDelegate;
+            }
+
+            s_RocketModComandWindowsDelegates.Clear();
+        }
+
+        private bool IsRocketModDelegate(Delegate? @delegate)
+        {
+            if (@delegate == null)
+            {
+                return false;
+            }
+
+            var methodInfo = @delegate.GetMethodInfo();
+            var assembly = methodInfo?.DeclaringType?.Assembly;
+
+            if (assembly == null)
+            {
+                return false;
+            }
+
+            var assemblyName = assembly.GetName();
+            return assemblyName.Name.Equals("Rocket.Unturned")
+                || assemblyName.Name.Equals("Rocket.Core");
         }
 
         private void Reset()

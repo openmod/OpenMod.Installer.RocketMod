@@ -17,12 +17,12 @@ namespace OpenMod.Installer.RocketMod.Commands
             new CommandStepChoice
             {
                 Name = "RocketMod (recommended)",
-                Value = "OpenMod will use RocketMod Uconomy for economy."
+                Description = "OpenMod will use RocketMod Uconomy for economy."
             },
             new CommandStepChoice
             {
                 Name = "OpenMod",
-                Value = "RocketMod will use OpenMod's economy system. Works with plugins that use Uconomy. Will import existing data from Uconomy."
+                Description = "RocketMod will use OpenMod's economy system. Works with plugins that use Uconomy. Will import existing data from Uconomy."
             }
         };
 
@@ -30,15 +30,18 @@ namespace OpenMod.Installer.RocketMod.Commands
         {
             switch (choice.ToLowerInvariant())
             {
-                case "RocketMod":
-                    break;
-                case "OpenMod":
+                case "rm":
+                case "rocket":
+                case "rocketmod":
+                    return;
+                case "om":
+                case "openmod":
                     Jobs.Add(new OpenModEconomyInstallJob());
                     Jobs.Add(new MigrateEconomyJob());
-                    break;
+                    return;
             }
 
-            throw new InvalidOperationException();
+            throw new InvalidChoiceException(choice);
         }
     }
 }

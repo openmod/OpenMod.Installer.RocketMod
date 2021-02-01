@@ -2,60 +2,68 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using OpenMod.Installer.RocketMod.Helpers;
+using System.Text.RegularExpressions;
+using Rocket.Core.Logging;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
     public class OpenModAssemblyLoadJob : IReversibleJob
     {
-        private static bool m_AssemblyResolveInstalled;
-        private static readonly Dictionary<string, Assembly> m_LoadedAssembles = new Dictionary<string, Assembly>();
+        private static bool m_AssemblyResolverInstalled;
+        private static readonly Dictionary<string, Assembly> m_LoadedAssemblies = new Dictionary<string, Assembly>();
+        private static readonly Regex VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
 
         public void ExecuteMigration()
         {
-            if (!m_AssemblyResolveInstalled)
+            Logger.Log("Loading OpenMod assemblies. Ignore the message spam below.");
+
+            if (!m_AssemblyResolverInstalled)
             {
                 AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-                m_AssemblyResolveInstalled = true;
+                m_AssemblyResolverInstalled = true;
             }
 
-            foreach (var file in Directory.GetFiles(OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory))
+            var moduleDirectory = OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory;
+            foreach (var file in Directory.GetFiles(moduleDirectory, "*.dll", SearchOption.TopDirectoryOnly))
             {
-                if (file.EndsWith(".dll"))
+                var dllPath = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory, file);
+                var asm = Assembly.Load(File.ReadAllBytes(dllPath));
+
+                var name = GetVersionIndependentName(asm.FullName);
+                if (m_LoadedAssemblies.ContainsKey(name))
                 {
-                    var dllPath = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory, file);
-                    var asm = Assembly.Load(File.ReadAllBytes(dllPath));
-
-                    var name = Extensions.GetVersionIndependentName(asm.FullName, out _);
-                    if (m_LoadedAssembles.ContainsKey(name))
-                    {
-                        continue;
-                    }
-
-                    m_LoadedAssembles.Add(name, asm);
+                    continue;
                 }
+
+                m_LoadedAssemblies.Add(name, asm);
             }
         }
 
         private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            var name = Extensions.GetVersionIndependentName(args.Name, out _);
+            var name = GetVersionIndependentName(args.Name);
 
-            if (m_LoadedAssembles.ContainsKey(name))
+            if (m_LoadedAssemblies.ContainsKey(name))
             {
-                return m_LoadedAssembles[name];
+                return m_LoadedAssemblies[name];
             }
 
             return null;
         }
 
+        public static string GetVersionIndependentName(string fullAssemblyName)
+        {
+            return VersionRegex.Replace(fullAssemblyName, string.Empty);
+        }
+
         public void Revert()
         {
-            if (m_AssemblyResolveInstalled)
+            m_LoadedAssemblies.Clear();
+    
+            if (m_AssemblyResolverInstalled)
             {
-                m_LoadedAssembles.Clear();
                 AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
-                m_AssemblyResolveInstalled = false;
+                m_AssemblyResolverInstalled = false;
             }
         }
     }

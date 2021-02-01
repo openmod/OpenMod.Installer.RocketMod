@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Rocket.Core.Logging;
 using System.IO;
@@ -37,10 +38,10 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
             Logger.Log($"Downloading {moduleAsset.AssetName}");
             var dataZip = webClient.DownloadData(moduleAsset.BrowserDownloadUrl);
-            
-            Logger.Log("Extracting OpenMod..");
+
+            Logger.Log("Extracting OpenMod module...");
             var modulesDirectory = OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory;
-           
+
             ExtractArchive(dataZip, modulesDirectory);
             Logger.Log("Successfully installed OpenMod module.");
         }
@@ -86,13 +87,22 @@ namespace OpenMod.Installer.RocketMod.Jobs
             Logger.Log("Uninstalling OpenMod...");
 
             var moduleDirectory = OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory;
-            var moduleFiles = Directory.GetFiles(moduleDirectory, "*.module", SearchOption.TopDirectoryOnly);
-
-            // We can't delete OpenMod dll files as we might have Assembly.Load'ed them at this point
-            // But we can delete the .module files instead
-            foreach (var file in moduleFiles)
+            try
             {
-                File.Delete(file);
+                Directory.Delete(moduleDirectory, true);
+                Logger.Log("Uninstalled OpenMod.");
+            }
+            catch (Exception ex)
+            {
+                // Delete failed but we can still delete the .module file to disable OpenMod
+
+                Logger.LogWarning($"Failed to delete the OpenMod: {ex.Message}.");
+
+                var moduleFiles = Directory.GetFiles(moduleDirectory, "*.module", SearchOption.TopDirectoryOnly);
+                foreach (var file in moduleFiles)
+                {
+                    File.Delete(file);
+                }
             }
         }
 

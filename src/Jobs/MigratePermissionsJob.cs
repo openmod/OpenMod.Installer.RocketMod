@@ -1,16 +1,13 @@
-﻿using OpenMod.API.Persistence;
-using OpenMod.Core.Permissions.Data;
-using OpenMod.Core.Persistence;
-using Rocket.API.Serialisation;
+﻿using Rocket.API.Serialisation;
 using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
-using OpenMod.API.Users;
-using OpenMod.Core.Helpers;
-using OpenMod.Core.Users;
+using OpenMod.Installer.RocketMod.Helpers;
 using Rocket.Core.Logging;
 
 namespace OpenMod.Installer.RocketMod.Jobs
@@ -27,7 +24,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
             using var stream = new FileStream(rocketPermissionsPath, FileMode.Open);
             var rocketPermissions = (RocketPermissions)deserializer.Deserialize(stream);
 
-            var openmodRoles = new PermissionRolesData
+            var openmodRoles = new
             {
                 Roles = new List<PermissionRoleData>()
             };
@@ -70,7 +67,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
                             LastDisplayName = member,
                             Permissions = new HashSet<string>(),
                             Roles = new HashSet<string>(),
-                            Type = KnownActorTypes.Player
+                            Type = "player"
                         };
 
                         openmodUsers.Users.Add(userData);
@@ -80,25 +77,35 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 }
             }
 
-            var datastore = new YamlDataStore(new DataStoreCreationParameters
-            {
-                ComponentId = "OpenMod.Core",
-                Prefix = "openmod",
-                Suffix = null,
-                WorkingDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory
-            });
+            var apiAssembly = AssemblyHelper.GetAssembly("OpenMod.API");
+            var datastoreCreationParametersType = apiAssembly.GetType("OpenMod.API.Persistence.DataStoreCreationParameters");
+            var workingDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory;
 
-            AsyncHelper.RunSync(async () => await datastore.SaveAsync("roles", openmodRoles));
-            AsyncHelper.RunSync(async () => await datastore.SaveAsync("users", openmodUsers));
+            var @params = Activator.CreateInstance(datastoreCreationParametersType);
+            @params.SetPropertyValue("ComponentId", "OpenMod.Core");
+            @params.SetPropertyValue("Prefix", "openmod");
+            @params.SetPropertyValue("WorkingDirectory", workingDirectory);
+
+            var coreAssembly = AssemblyHelper.GetAssembly("OpenMod.Core");
+            var datastoreType = coreAssembly.GetType("OpenMod.Core.Persistence.YamlDataStore");
+            var ctor = datastoreType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { datastoreCreationParametersType }, null);
+
+            var dataStore = ctor.Invoke(new[] { @params });
+            var saveMethod = dataStore.GetType().GetMethod("SaveAsync", BindingFlags.Instance | BindingFlags.Public);
+            var saveMethodTaskRoles = (Task)saveMethod.Invoke(dataStore, new object[] { "roles", openmodRoles });
+            var saveMethodTaskUsers = (Task)saveMethod.Invoke(dataStore, new object[] { "users", openmodUsers });
+
+            AsyncHelperEx.RunSync(() => saveMethodTaskRoles);
+            AsyncHelperEx.RunSync(() => saveMethodTaskUsers);
             Logger.Log($"Imported {openmodRoles.Roles.Count} permission group(s) and {openmodUsers.Users.Count} player(s) from RocketMod's Permission.config.xml to OpenMod.");
         }
 
         public void Revert()
         {
-            Logger.Log("Deleting OpenMod permissions and roles files...");
-          
+            Logger.Log("Deleting OpenMod users and roles files...");
+
             var workingDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory;
-            var rolesFile  = Path.Combine(workingDirectory, "openmod.roles.yaml");
+            var rolesFile = Path.Combine(workingDirectory, "openmod.roles.yaml");
             if (File.Exists(rolesFile))
             {
                 File.Delete(rolesFile);
@@ -109,6 +116,36 @@ namespace OpenMod.Installer.RocketMod.Jobs
             {
                 File.Delete(usersfile);
             }
+
+            Logger.Log("Deleted OpenMod users and role files.");
         }
+    }
+
+    public class UserData
+    {
+        public string Id { get; set; }
+        public string Type { get; set; }
+
+        public string LastDisplayName { get; set; }
+
+        public DateTime FirstSeen { get; set; }
+
+        public DateTime LastSeen { get; set; }
+
+        public HashSet<string> Permissions { get; set; }
+
+        public HashSet<string> Roles { get; set; }
+        public Dictionary<string, object> Data { get; set; }
+    }
+
+    public class PermissionRoleData
+    {
+        public string Id { get; set; }
+        public int Priority { get; set; }
+        public HashSet<string> Parents { get; set; }
+        public HashSet<string> Permissions { get; set; }
+        public string DisplayName { get; set; }
+        public Dictionary<string, object> Data { get; set; }
+        public bool IsAutoAssigned { get; set; }
     }
 }

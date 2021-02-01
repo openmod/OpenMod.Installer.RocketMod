@@ -7,16 +7,16 @@ namespace OpenMod.Installer.RocketMod.Jobs
 {
     public static class JobsExecutor
     {
-        public static void Execute(List<IJob> jobsToExecute)
+        public static bool Execute(List<IJob> jobsToExecute)
         {
             var executedJobs = new List<IJob>();
 
             for (var i = 0; i < jobsToExecute.Count; i++)
             {
                 var job = jobsToExecute.ElementAt(i);
-                
+
                 var jobName = job.GetType().Name;
-                
+
                 try
                 {
                     executedJobs.Add(job);
@@ -32,16 +32,17 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
                     jobsToExecute.Clear();
                     Logger.Log("OpenMod installation has failed. No changes were made. Please report this issue on the OpenMod discord: https://discord.gg/J9KYMaMaTN.");
-                    return;
+                    return false;
                 }
             }
 
-            Logger.Log("Migration successfully finished. Restart your server to finish installation.");
+            Logger.Log("Migration successfully finished. Restart your server to complete installation.");
+            return true;
         }
 
         private static void Revert(IReadOnlyList<IJob> jobs)
         {
-            for (var i = jobs.Count; i >= 0; i--)
+            for (var i = (jobs.Count - 1); i >= 0; i--)
             {
                 var job = jobs[i];
                 if (!(job is IReversibleJob reversibleJob))
@@ -50,7 +51,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 }
 
                 var jobName = reversibleJob.GetType().Name;
-                    
+
                 try
                 {
                     reversibleJob.Revert();
