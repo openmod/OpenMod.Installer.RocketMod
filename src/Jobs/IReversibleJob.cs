@@ -1,6 +1,6 @@
 ﻿namespace OpenMod.Installer.RocketMod.Jobs
 {
-    public interface IRevertable
+    public interface IReversibleJob : IJob
     {
         void Revert();
     }

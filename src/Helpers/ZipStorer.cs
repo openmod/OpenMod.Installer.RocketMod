@@ -4,13 +4,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Text;
 
 #if !NOASYNC
 using System.Threading.Tasks;
 #endif
 
-namespace System.IO.Compression
+namespace OpenMod.Installer.RocketMod.Helpers
 {
     /// <summary>
     /// Unique class for compression/decompression file. Represents a Zip file.

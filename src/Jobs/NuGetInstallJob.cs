@@ -3,21 +3,23 @@ using OpenMod.NuGet;
 using Rocket.Core.Logging;
 using System.IO;
 using System.Threading.Tasks;
+using OpenMod.Core.Helpers;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
-    public abstract class NuGetInstallJob : IJob, IRevertable
+    public abstract class NuGetInstallJob : IReversibleJob
     {
-        private readonly string _packageId;
-        private string _packageDirectory;
+        private readonly string m_PackageId;
+        private string m_PackageDirectory;
 
         protected NuGetInstallJob(string packageId)
         {
-            _packageId = packageId;
+            m_PackageId = packageId;
         }
 
         public void ExecuteMigration()
         {
+            Logger.Log($"Installing package \"{m_PackageId}\"...");
             AsyncHelper.RunSync(DownloadPackage);
         }
 
@@ -27,18 +29,19 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
             const bool allowPrereleaseVersions = false;
 
-            var pluginPackage = await nuGetPackageManager.QueryPackageExactAsync(_packageId, includePreRelease: allowPrereleaseVersions);
+            var pluginPackage = await nuGetPackageManager.QueryPackageExactAsync(m_PackageId, includePreRelease: allowPrereleaseVersions);
             if (pluginPackage == null)
             {
-                Logger.Log($"Downloading has failed for {_packageId}: {NuGetInstallCode.PackageOrVersionNotFound}");
+                Logger.Log($"Downloading has failed for {m_PackageId}: {NuGetInstallCode.PackageOrVersionNotFound}");
                 return;
             }
+
             var installResult = await nuGetPackageManager.InstallAsync(pluginPackage.Identity, allowPrereleaseVersions);
-            if (installResult.Code == NuGetInstallCode.Success)
+            if (installResult.Code == NuGetInstallCode.Success) // todo there is another  code
             {
-                _packageDirectory = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory, "packages",
+                m_PackageDirectory = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory, "packages",
                     installResult.Identity.ToString());
-                Logger.Log($"Finished downloading \"{_packageId}\".");
+                Logger.Log($"Finished downloading \"{m_PackageId}\".");
             }
             else
             {
@@ -48,11 +51,13 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
         public void Revert()
         {
-            if (string.IsNullOrEmpty(_packageDirectory) || !Directory.Exists(_packageDirectory))
+            if (string.IsNullOrEmpty(m_PackageDirectory) || !Directory.Exists(m_PackageDirectory))
             {
                 return;
             }
-            Directory.Delete(_packageDirectory, true);
+
+            Logger.Log($"Uninstalling package \"{m_PackageId}\"");
+            Directory.Delete(m_PackageDirectory, true);
         }
     }
 }

@@ -1,36 +1,44 @@
 ﻿using OpenMod.NuGet;
 using System;
+using System.IO;
 
 namespace OpenMod.Installer.RocketMod.Helpers
 {
     public static class NuGetHelper
     {
-        private static NuGetPackageManager NuGetPackageManager { get; set; }
+        private static NuGetPackageManager m_NuGetPackageManager;
         public static NuGetPackageManager GetNuGetPackageManager()
         {
-            if (NuGetPackageManager != null)
+            if (m_NuGetPackageManager != null)
             {
-                return NuGetPackageManager;
+                return m_NuGetPackageManager;
             }
 
-            var path = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory + "/packages";
-            Environment.SetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA", path);
+            var workingDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory;
+            var packagesPath = Path.Combine(workingDirectory, "packages");
+
+            if (!Directory.Exists(packagesPath))
+            {
+                Directory.CreateDirectory(packagesPath);
+            }
+
+            Environment.SetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA", packagesPath);
 
             // NuGetPackageManager should auto create directory
-            NuGetPackageManager = new NuGetPackageManager(path)
+            m_NuGetPackageManager = new NuGetPackageManager(packagesPath)
             {
                 Logger = new NuGetConsoleLogger()
             };
 
-            // these dependencies do not exist on NuGet and create warnings
-            // they are not required
-            NuGetPackageManager.IgnoreDependencies(
+            m_NuGetPackageManager.IgnoreDependencies(
                 "Microsoft.NETCore.Platforms",
                 "Microsoft.Packaging.Tools",
                 "NETStandard.Library",
+                "OpenMod.Unturned.Redist",
+                "OpenMod.UnityEngine.Redist",
                 "System.IO.FileSystem.Watcher");
 
-            return NuGetPackageManager;
+            return m_NuGetPackageManager;
         }
     }
 }

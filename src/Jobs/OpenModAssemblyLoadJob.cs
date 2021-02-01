@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using OpenMod.Installer.RocketMod.Helpers;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
-    public class AssemblyLoadJob : IJob, IRevertable
+    public class OpenModAssemblyLoadJob : IReversibleJob
     {
-        private static bool _assemblyResolveInstalled;
-        private static readonly Dictionary<string, Assembly> _loadedAssembles = new Dictionary<string, Assembly>();
+        private static bool m_AssemblyResolveInstalled;
+        private static readonly Dictionary<string, Assembly> m_LoadedAssembles = new Dictionary<string, Assembly>();
 
         public void ExecuteMigration()
         {
-            if (!_assemblyResolveInstalled)
+            if (!m_AssemblyResolveInstalled)
             {
-                AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-                _assemblyResolveInstalled = true;
+                AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+                m_AssemblyResolveInstalled = true;
             }
 
             foreach (var file in Directory.GetFiles(OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory))
@@ -26,33 +27,35 @@ namespace OpenMod.Installer.RocketMod.Jobs
                     var asm = Assembly.Load(File.ReadAllBytes(dllPath));
 
                     var name = Extensions.GetVersionIndependentName(asm.FullName, out _);
-                    if (_loadedAssembles.ContainsKey(name))
+                    if (m_LoadedAssembles.ContainsKey(name))
                     {
                         continue;
                     }
 
-                    _loadedAssembles.Add(name, asm);
+                    m_LoadedAssembles.Add(name, asm);
                 }
             }
         }
 
-        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
             var name = Extensions.GetVersionIndependentName(args.Name, out _);
-            if (_loadedAssembles.ContainsKey(name))
+
+            if (m_LoadedAssembles.ContainsKey(name))
             {
-                return _loadedAssembles[name];
+                return m_LoadedAssembles[name];
             }
+
             return null;
         }
 
         public void Revert()
         {
-            if (_assemblyResolveInstalled)
+            if (m_AssemblyResolveInstalled)
             {
-                _loadedAssembles.Clear();
-                AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomain_AssemblyResolve;
-                _assemblyResolveInstalled = false;
+                m_LoadedAssembles.Clear();
+                AppDomain.CurrentDomain.AssemblyResolve -= OnAssemblyResolve;
+                m_AssemblyResolveInstalled = false;
             }
         }
     }
