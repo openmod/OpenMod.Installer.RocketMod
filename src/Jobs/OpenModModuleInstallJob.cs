@@ -20,30 +20,29 @@ namespace OpenMod.Installer.RocketMod.Jobs
             {
                 m_OpenModInstalledAlready = true;
             }
-            byte[] bytes = File.ReadAllBytes(@"C:\testing.zip");
-            
-            //using var webClient = new WebClient();
-            //webClient.Headers.Add("User-Agent", "request");
 
-            //// todo: query *all* releases, not only the latest
-            //var releaseData = webClient.DownloadString("https://api.github.com/repos/openmod/openmod/releases/latest");
-            //var release = JsonConvert.DeserializeObject<GitHubRelease>(releaseData);
+            using var webClient = new WebClient();
+            webClient.Headers.Add("User-Agent", "request");
 
-            ////this can never be empty UNLESS OpenMod posts a release without the Unturned Module
-            //var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"));
-            //if (moduleAsset == null)
-            //{
-            //    Logger.Log("Failed to find latest OpenMod.Unturned release");
-            //    return;
-            //}
+            // todo: query *all* releases, not only the latest
+            var releaseData = webClient.DownloadString("https://api.github.com/repos/openmod/openmod/releases/latest");
+            var release = JsonConvert.DeserializeObject<GitHubRelease>(releaseData);
 
-            //Logger.Log($"Downloading {moduleAsset.AssetName}");
-            //var dataZip = webClient.DownloadData(moduleAsset.BrowserDownloadUrl);
+            //this can never be empty UNLESS OpenMod posts a release without the Unturned Module
+            var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"));
+            if (moduleAsset == null)
+            {
+                Logger.Log("Failed to find latest OpenMod.Unturned release");
+                return;
+            }
 
-            //Logger.Log("Extracting OpenMod module...");
+            Logger.Log($"Downloading {moduleAsset.AssetName}");
+            var dataZip = webClient.DownloadData(moduleAsset.BrowserDownloadUrl);
+
+            Logger.Log("Extracting OpenMod module...");
             var modulesDirectory = OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory;
 
-            ExtractArchive(bytes, modulesDirectory);
+            ExtractArchive(dataZip, modulesDirectory);
             Logger.Log("Successfully installed OpenMod module.");
         }
 
