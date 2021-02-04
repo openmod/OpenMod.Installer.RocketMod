@@ -33,7 +33,7 @@ namespace OpenMod.Installer.RocketMod
                 foreach (var file in Directory.GetFiles(moduleDirectory, "*.dll", SearchOption.TopDirectoryOnly))
                 {
                     var assemblyName = AssemblyName.GetAssemblyName(file);
-                    if (assemblyName.Name.Equals("OpenMod.Unturned"))
+                    if (assemblyName.Name.Equals("OpenMod.Unturned.Module"))
                     {
                         InstalledVersion = assemblyName.Version;
                         ModuleDirectory = moduleDirectory;
