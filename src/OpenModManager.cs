@@ -21,7 +21,7 @@ namespace OpenMod.Installer.RocketMod
             foreach (var moduleDirectory in Directory.GetDirectories(modulesDirectory))
             {
                 var isModuleFilePresent = Directory
-                    .GetFiles(moduleDirectory, "*.module,", SearchOption.TopDirectoryOnly)
+                    .GetFiles(moduleDirectory, "*.module", SearchOption.TopDirectoryOnly)
                     .Length > 0;
 
                 // Not an Unturned module

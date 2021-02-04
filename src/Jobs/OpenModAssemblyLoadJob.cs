@@ -20,18 +20,21 @@ namespace OpenMod.Installer.RocketMod.Jobs
             try
             {
                 var assemblyLoadEvent = (MulticastDelegate)typeof(AppDomain)
-                    .GetField("AssemblyLoad", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .GetField("AssemblyLoad", BindingFlags.NonPublic | BindingFlags.Instance)!
                     .GetValue(AppDomain.CurrentDomain);
 
-                foreach (var @delegate in assemblyLoadEvent.GetInvocationList())
+                if (assemblyLoadEvent != null)
                 {
-                    var asmFullName = @delegate?.GetMethodInfo()?.DeclaringType?.Assembly?.FullName;
-                    if (asmFullName != null && (asmFullName.StartsWith("AviRockets.Module", StringComparison.OrdinalIgnoreCase)
-                        || asmFullName.StartsWith("AviRockets.Mothership", StringComparison.OrdinalIgnoreCase)))
+                    foreach (var @delegate in assemblyLoadEvent.GetInvocationList())
                     {
-                        var eventHandler = (AssemblyLoadEventHandler)@delegate;
-                        AppDomain.CurrentDomain.AssemblyLoad -= eventHandler;
-                        aviEvents.Add(eventHandler);
+                        var asmFullName = @delegate?.GetMethodInfo()?.DeclaringType?.Assembly?.FullName;
+                        if (asmFullName != null && (asmFullName.StartsWith("AviRockets.Module", StringComparison.OrdinalIgnoreCase)
+                            || asmFullName.StartsWith("AviRockets.Mothership", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            var eventHandler = (AssemblyLoadEventHandler)@delegate;
+                            AppDomain.CurrentDomain.AssemblyLoad -= eventHandler;
+                            aviEvents.Add(eventHandler);
+                        }
                     }
                 }
 
