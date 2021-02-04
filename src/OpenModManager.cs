@@ -10,11 +10,11 @@ namespace OpenMod.Installer.RocketMod
 {
     public class OpenModManager
     {
-        private static IModuleNexus m_Instance;
-       
+        private static IModuleNexus s_Instance;
+
         public OpenModManager()
         {
-            WorkingDirectory = Path.Combine(ReadWrite.PATH, "Servers", Provider.serverID, "OpenMod"); ;
+            WorkingDirectory = Path.Combine(ReadWrite.PATH, "Servers", Provider.serverID, "OpenMod");
 
             // Find existing module directory. It may not be named OpenMod.Unturned.
             var modulesDirectory = Path.Combine(ReadWrite.PATH, "Modules");
@@ -22,7 +22,7 @@ namespace OpenMod.Installer.RocketMod
             {
                 var isModuleFilePresent = Directory
                     .GetFiles(moduleDirectory, "*.module,", SearchOption.TopDirectoryOnly)
-                    .Any();
+                    .Length > 0;
 
                 // Not an Unturned module
                 if (!isModuleFilePresent)
@@ -73,7 +73,7 @@ namespace OpenMod.Installer.RocketMod
         /// <summary>
         /// Checks if OpenMod is loaded as a module.
         /// </summary>
-        public bool IsOpenModModuleLoaded 
+        public bool IsOpenModModuleLoaded
         {
             get => GetOpenModModule() != null;
         }
@@ -86,7 +86,7 @@ namespace OpenMod.Installer.RocketMod
         /// <summary>
         /// Gets the OpenMod working directory.
         /// </summary>
-        public string WorkingDirectory { get; } 
+        public string WorkingDirectory { get; }
 
         /// <summary>
         /// Gets the OpenMod module directory.
@@ -97,7 +97,7 @@ namespace OpenMod.Installer.RocketMod
         /// Checks if OpenMod is installed. Keep in mind that OpenMod can be installed but the module may be disabled.
         /// Use <see cref="IsOpenModModuleLoaded"/> to check if OpenMod is loaded.
         /// </summary>
-        public bool IsOpenModInstalled 
+        public bool IsOpenModInstalled
         {
             get => InstalledVersion != null;
         }
@@ -108,22 +108,22 @@ namespace OpenMod.Installer.RocketMod
         /// <returns>The OpenMod Unturned module, can return null if the module is not loaded.</returns>
         public static IModuleNexus GetOpenModModule()
         {
-            if (m_Instance != null)
+            if (s_Instance != null)
             {
-                return m_Instance;
+                return s_Instance;
             }
 
             var module = ModuleHook.getModuleByName("OpenMod.Unturned");
             var field = typeof(SDG.Framework.Modules.Module).GetField("nexii", BindingFlags.NonPublic | BindingFlags.Instance);
             if (field == null)
             {
-                throw new Exception("Failed to find nexii field in SDg.Unturned.Module class");
+                throw new Exception("Failed to find nexii field in SDG.Unturned.Module class");
             }
-            
-            var nexii = (IList<IModuleNexus>)field.GetValue(module);
-            m_Instance = nexii.FirstOrDefault(d => d.GetType().Assembly.FullName.Contains("OpenMod"));
 
-            return m_Instance;
+            var nexii = (IList<IModuleNexus>)field.GetValue(module);
+            s_Instance = nexii.FirstOrDefault(d => d.GetType().Assembly.FullName.Contains("OpenMod"));
+
+            return s_Instance;
         }
     }
 }

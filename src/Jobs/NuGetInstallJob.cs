@@ -1,8 +1,8 @@
-﻿using System;
-using OpenMod.Installer.RocketMod.Helpers;
+﻿using OpenMod.Installer.RocketMod.Helpers;
+using OpenMod.NuGet;
 using Rocket.Core.Logging;
+using System;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace OpenMod.Installer.RocketMod.Jobs
@@ -20,39 +20,48 @@ namespace OpenMod.Installer.RocketMod.Jobs
         public void ExecuteMigration()
         {
             Logger.Log($"Installing package \"{m_PackageId}\"...");
-            DownloadPackage();
+            AsyncHelperEx.RunSync(DownloadPackage);
             Logger.Log($"Installed package \"{m_PackageId}\".");
         }
 
-        private void DownloadPackage()
+        private async Task DownloadPackage()
         {
             var nuGetPackageManager = NuGetHelper.GetNuGetPackageManager();
 
-            const bool allowPrereleaseVersions = false;
+            const bool c_AllowPreReleaseVersion = false;
 
-            var queryPackageExactMethod = nuGetPackageManager.GetType().GetMethod("QueryPackageExactAsync", BindingFlags.Instance | BindingFlags.Public);
-            var queryPackageExactTask = queryPackageExactMethod.Invoke(nuGetPackageManager, new object[] { m_PackageId, null /* version*/, allowPrereleaseVersions });
-            var pluginPackage = queryPackageExactTask.GetPropertyValue("Result");
-            if (pluginPackage == null)
+            var OldPackageidentity = await nuGetPackageManager.GetLatestPackageIdentityAsync(m_PackageId);
+            if (OldPackageidentity == null)
             {
-                Logger.Log($"Downloading has failed for {m_PackageId}: {NuGetInstallCode.PackageOrVersionNotFound}");
-                return;
-            }
+                var package = await nuGetPackageManager.QueryPackageExactAsync(m_PackageId, null, c_AllowPreReleaseVersion);
+                if (package == null || package.Identity == null)
+                {
+                    Logger.Log($"Downloading has failed for {m_PackageId}: {NuGetInstallCode.PackageOrVersionNotFound}");
+                    return;
+                }
+                var identity = package.Identity;
 
-            var identity = pluginPackage.GetPropertyValue("Identity");
-         
-            var installMethod = nuGetPackageManager.GetType().GetMethod("InstallAsync", BindingFlags.Public | BindingFlags.Instance);
-            var installMethodTask = installMethod.Invoke(nuGetPackageManager, new[] { identity, allowPrereleaseVersions });
-            var installResult = installMethodTask.GetType().GetPropertyValue("Result");
-            var installResultCode = (NuGetInstallCode)installResult.GetPropertyValue("Code");
-            if (installResultCode == NuGetInstallCode.Success || installResultCode == NuGetInstallCode.NoUpdatesFound)
-            {
-                m_PackageDirectory = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory, "packages", identity.ToString());
-                Logger.Log($"Finished downloading \"{m_PackageId}\".");
-            }
-            else
-            {
-                Logger.Log($"Downloading has failed for {m_PackageId}: {installResultCode}");
+                var installResult = await nuGetPackageManager.InstallAsync(identity, c_AllowPreReleaseVersion);
+                bool isInstalled;
+                if (Enum.GetValues(typeof(NuGetInstallCode)).Length == 3) // loaded 3.0 version openmod 
+                {
+                    isInstalled = (int)installResult.Code is 0 or 1; // Success / NoUpdatesFound
+                }
+                else
+                {
+                    isInstalled = installResult.Code == NuGetInstallCode.Success;
+                }
+
+                if (isInstalled)
+                {
+                    m_PackageDirectory = Path.Combine(OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory, "packages",
+                        identity.ToString());
+                    Logger.Log($"Finished downloading \"{m_PackageId}\".");
+                }
+                else
+                {
+                    Logger.Log($"Downloading has failed for {m_PackageId}: {installResult.Code}");
+                }
             }
         }
 
@@ -65,13 +74,6 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
             Logger.Log($"Uninstalling package \"{m_PackageId}\"");
             Directory.Delete(m_PackageDirectory, true);
-        }
-
-        private enum NuGetInstallCode
-        {
-            Success,
-            NoUpdatesFound,
-            PackageOrVersionNotFound
         }
     }
 }

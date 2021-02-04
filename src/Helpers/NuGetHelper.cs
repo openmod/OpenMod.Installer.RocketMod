@@ -1,17 +1,19 @@
-﻿using System;
+﻿using OpenMod.Installer.RocketMod.Jobs;
+using OpenMod.NuGet;
+using System;
 using System.IO;
-using System.Reflection;
 
 namespace OpenMod.Installer.RocketMod.Helpers
 {
     public static class NuGetHelper
     {
-        private static object m_NuGetPackageManager;
-        public static object GetNuGetPackageManager()
+        private static NuGetPackageManager s_NuGetPackageManager;
+
+        public static NuGetPackageManager GetNuGetPackageManager()
         {
-            if (m_NuGetPackageManager != null)
+            if (s_NuGetPackageManager != null)
             {
-                return m_NuGetPackageManager;
+                return s_NuGetPackageManager;
             }
 
             var workingDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory;
@@ -24,25 +26,20 @@ namespace OpenMod.Installer.RocketMod.Helpers
 
             Environment.SetEnvironmentVariable("NUGET_COMMON_APPLICATION_DATA", packagesPath);
 
-            var assembly = AssemblyHelper.GetAssembly("OpenMod.NuGet");
-            var nugetPackageManagerType = assembly.GetType("OpenMod.NuGet.NuGetPackageManager");
-            var ignoreDependenciesMethod = nugetPackageManagerType.GetMethod("IgnoreDependencies", BindingFlags.Instance | BindingFlags.Public);
-            m_NuGetPackageManager = Activator.CreateInstance(nugetPackageManagerType, packagesPath);
-
-            ignoreDependenciesMethod.Invoke(m_NuGetPackageManager, new object[]
+            s_NuGetPackageManager = new NuGetPackageManager(packagesPath)
             {
-                new[]
-                {
-                    "Microsoft.NETCore.Platforms",
-                    "Microsoft.Packaging.Tools",
-                    "NETStandard.Library",
-                    "OpenMod.Unturned.Redist",
-                    "OpenMod.UnityEngine.Redist",
-                    "System.IO.FileSystem.Watcher"
-                }
-            });
+                Logger = new NuGetConsoleLogger()
+            };
 
-            return m_NuGetPackageManager;
+            s_NuGetPackageManager.IgnoreDependencies(
+                "Microsoft.NETCore.Platforms",
+                "Microsoft.Packaging.Tools",
+                "NETStandard.Library",
+                /*"OpenMod.Unturned.Redist",
+                "OpenMod.UnityEngine.Redist",*/ // todo
+                "System.IO.FileSystem.Watcher");
+
+            return s_NuGetPackageManager;
         }
     }
 }

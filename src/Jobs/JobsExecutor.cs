@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Rocket.Core.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using Rocket.Core.Logging;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
@@ -13,7 +12,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
             for (var i = 0; i < jobsToExecute.Count; i++)
             {
-                var job = jobsToExecute.ElementAt(i);
+                var job = jobsToExecute[i];
 
                 var jobName = job.GetType().Name;
 
@@ -45,7 +44,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
             for (var i = (jobs.Count - 1); i >= 0; i--)
             {
                 var job = jobs[i];
-                if (!(job is IReversibleJob reversibleJob))
+                if (job is not IReversibleJob reversibleJob)
                 {
                     continue;
                 }

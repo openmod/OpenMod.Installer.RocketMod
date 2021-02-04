@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Nito.AsyncEx;
+using System;
 using System.Threading.Tasks;
 
 namespace OpenMod.Installer.RocketMod.Helpers
@@ -7,7 +8,7 @@ namespace OpenMod.Installer.RocketMod.Helpers
     {
         public static void RunSync(Func<Task> task)
         {
-            task().GetAwaiter().GetResult();
+            AsyncContext.Run(task);
         }
     }
 }

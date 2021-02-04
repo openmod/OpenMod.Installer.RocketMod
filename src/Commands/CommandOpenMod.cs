@@ -1,11 +1,11 @@
-﻿using Rocket.API;
+﻿using OpenMod.Installer.RocketMod.Jobs;
+using Rocket.API;
 using Rocket.Core.Logging;
+using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using OpenMod.Installer.RocketMod.Jobs;
-using SDG.Unturned;
 
 namespace OpenMod.Installer.RocketMod.Commands
 {
@@ -45,6 +45,7 @@ namespace OpenMod.Installer.RocketMod.Commands
 
             s_Jobs.Add(new OpenModModuleInstallJob());
             s_Jobs.Add(new OpenModAssemblyLoadJob());
+            s_Jobs.Add(new OpenModUnturnedInstallJob());
             s_Jobs.Add(new PermissionsExInstallJob());
 
             s_CurrentStep = GetNextStep();
@@ -120,7 +121,7 @@ namespace OpenMod.Installer.RocketMod.Commands
 
         private void RemoveRocketModConsoleInput()
         {
-            if (s_RocketModComandWindowsDelegates.Any())
+            if (s_RocketModComandWindowsDelegates.Count > 0)
             {
                 return;
             }
@@ -149,7 +150,7 @@ namespace OpenMod.Installer.RocketMod.Commands
             s_RocketModComandWindowsDelegates.Clear();
         }
 
-        private bool IsRocketModDelegate(Delegate? @delegate)
+        private bool IsRocketModDelegate(Delegate @delegate)
         {
             if (@delegate == null)
             {
@@ -181,18 +182,14 @@ namespace OpenMod.Installer.RocketMod.Commands
         {
             // null -> Permission -> Economy -> null
 
-            switch (s_CurrentStep)
+            return s_CurrentStep switch
             {
-                case null:
-                    return new OpenModPermissionsStep(s_Jobs);
-                case OpenModPermissionsStep _:
-                    return new OpenModEconomyStep(s_Jobs);
-                case OpenModEconomyStep _:
-                    return null;
-            }
-
-            // can not happen
-            throw new InvalidOperationException("Invalid state");
+                null => new OpenModPermissionsStep(s_Jobs),
+                OpenModPermissionsStep _ => new OpenModEconomyStep(s_Jobs),
+                OpenModEconomyStep _ => null,
+                // can not happen
+                _ => throw new InvalidOperationException("Invalid state"),
+            };
         }
 
         public AllowedCaller AllowedCaller { get; } = AllowedCaller.Console;

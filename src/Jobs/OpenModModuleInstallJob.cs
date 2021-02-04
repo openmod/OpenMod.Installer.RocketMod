@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using OpenMod.Installer.RocketMod.Helpers;
 using Rocket.Core.Logging;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using OpenMod.Installer.RocketMod.Helpers;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
@@ -20,29 +20,30 @@ namespace OpenMod.Installer.RocketMod.Jobs
             {
                 m_OpenModInstalledAlready = true;
             }
+            byte[] bytes = File.ReadAllBytes(@"C:\testing.zip");
+            
+            //using var webClient = new WebClient();
+            //webClient.Headers.Add("User-Agent", "request");
 
-            using var webClient = new WebClient();
-            webClient.Headers.Add("User-Agent", "request");
+            //// todo: query *all* releases, not only the latest
+            //var releaseData = webClient.DownloadString("https://api.github.com/repos/openmod/openmod/releases/latest");
+            //var release = JsonConvert.DeserializeObject<GitHubRelease>(releaseData);
 
-            // todo: query *all* releases, not only the latest
-            var releaseData = webClient.DownloadString("https://api.github.com/repos/openmod/openmod/releases/latest");
-            var release = JsonConvert.DeserializeObject<GitHubRelease>(releaseData);
+            ////this can never be empty UNLESS OpenMod posts a release without the Unturned Module
+            //var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl.Contains("OpenMod.Unturned.Module"));
+            //if (moduleAsset == null)
+            //{
+            //    Logger.Log("Failed to find latest OpenMod.Unturned release");
+            //    return;
+            //}
 
-            //this can never be empty UNLESS OpenMod posts a release without the Unturned Module
-            var moduleAsset = release.Assets.Find(x => x.BrowserDownloadUrl?.Contains("OpenMod.Unturned.Module") ?? false);
-            if (moduleAsset == null)
-            {
-                Logger.Log("Failed to find latest OpenMod.Unturned release");
-                return;
-            }
+            //Logger.Log($"Downloading {moduleAsset.AssetName}");
+            //var dataZip = webClient.DownloadData(moduleAsset.BrowserDownloadUrl);
 
-            Logger.Log($"Downloading {moduleAsset.AssetName}");
-            var dataZip = webClient.DownloadData(moduleAsset.BrowserDownloadUrl);
-
-            Logger.Log("Extracting OpenMod module...");
+            //Logger.Log("Extracting OpenMod module...");
             var modulesDirectory = OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory;
 
-            ExtractArchive(dataZip, modulesDirectory);
+            ExtractArchive(bytes, modulesDirectory);
             Logger.Log("Successfully installed OpenMod module.");
         }
 

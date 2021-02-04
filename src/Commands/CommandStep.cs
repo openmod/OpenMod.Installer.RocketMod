@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using OpenMod.Installer.RocketMod.Jobs;
+﻿using OpenMod.Installer.RocketMod.Jobs;
+using System.Collections.Generic;
 
 namespace OpenMod.Installer.RocketMod.Commands
 {

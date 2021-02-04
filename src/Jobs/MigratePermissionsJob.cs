@@ -1,4 +1,6 @@
-﻿using Rocket.API.Serialisation;
+﻿using OpenMod.Installer.RocketMod.Helpers;
+using Rocket.API.Serialisation;
+using Rocket.Core.Logging;
 using SDG.Unturned;
 using System;
 using System.Collections.Generic;
@@ -7,8 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using OpenMod.Installer.RocketMod.Helpers;
-using Rocket.Core.Logging;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
@@ -55,7 +55,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
                 foreach (var member in group.Members)
                 {
-                    var userData = openmodUsers.Users.FirstOrDefault(d => d.Id == member);
+                    var userData = openmodUsers.Users.Find(d => d.Id == member);
                     if (userData == null)
                     {
                         userData = new UserData

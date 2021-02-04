@@ -4,7 +4,6 @@
     {
         public PermissionsExInstallJob() : base("DiFFoZ.PermissionExtensions")
         {
-
         }
     }
 }

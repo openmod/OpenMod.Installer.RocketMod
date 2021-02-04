@@ -3,10 +3,12 @@
   <PropertyGroup>
     <Version>0.0.0</Version>
     <TargetFrameworks>net461</TargetFrameworks>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Nito.AsyncEx.Context" Version="5.1.0" />
+    <PackageReference Include="OpenMod.NuGet" Version="2.3.8" />
     <PackageReference Include="OpenMod.UnityEngine.Redist" Version="2019.4.10" />
     <PackageReference Include="OpenMod.Unturned.Redist" Version="3.20.14" />
   </ItemGroup>
