@@ -14,7 +14,7 @@ namespace OpenMod.Installer.RocketMod.Commands
         private static readonly List<IJob> s_Jobs = new List<IJob>();
         private static readonly List<CommandWindowInputted> s_RocketModComandWindowsDelegates = new List<CommandWindowInputted>();
         private static CommandStep s_CurrentStep;
-
+        private static string[] s_Args;
         public void Execute(IRocketPlayer caller, string[] command)
         {
             if (command.Length < 1)
@@ -37,6 +37,8 @@ namespace OpenMod.Installer.RocketMod.Commands
             }
 
             Reset();
+
+            s_Args = command;
             Logger.Log("Starting OpenMod installation..", ConsoleColor.DarkCyan);
             Logger.Log("Visit https://openmod.github.io/openmod-docs for information.", ConsoleColor.DarkCyan);
             Logger.Log("Type \"cancel\" to cancel.", ConsoleColor.Cyan);
@@ -111,7 +113,7 @@ namespace OpenMod.Installer.RocketMod.Commands
         {
             try
             {
-                JobsExecutor.Execute(s_Jobs);
+                JobsExecutor.Execute(s_Jobs, s_Args);
             }
             finally
             {
@@ -175,6 +177,7 @@ namespace OpenMod.Installer.RocketMod.Commands
             s_CurrentStep = null;
             s_Jobs.Clear();
             UnbindCommandInput();
+            s_Args = null;
         }
 
         // Some really shitty state machine

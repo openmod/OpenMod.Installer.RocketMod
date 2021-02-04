@@ -6,7 +6,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
 {
     public static class JobsExecutor
     {
-        public static bool Execute(List<IJob> jobsToExecute)
+        public static bool Execute(List<IJob> jobsToExecute, string[] args)
         {
             var executedJobs = new List<IJob>();
 
@@ -19,7 +19,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 try
                 {
                     executedJobs.Add(job);
-                    job.ExecuteMigration();
+                    job.ExecuteMigration(args);
                 }
                 catch (Exception e)
                 {

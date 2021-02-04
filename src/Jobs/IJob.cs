@@ -2,6 +2,6 @@
 {
     public interface IJob
     {
-        void ExecuteMigration();
+        void ExecuteMigration(string[] args);
     }
 }

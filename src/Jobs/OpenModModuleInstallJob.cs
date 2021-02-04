@@ -12,7 +12,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
     {
         private bool m_OpenModInstalledAlready;
 
-        public void ExecuteMigration()
+        public void ExecuteMigration(string[] args)
         {
             Logger.Log("Downloading and installing the OpenMod module.");
 
@@ -66,13 +66,19 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 }
 
                 var path = Path.Combine(directory, Path.GetFileName(file.FilenameInZip));
-
-                if (File.Exists(path))
+                try
                 {
-                    File.Delete(path);
-                }
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
 
-                zip.ExtractFile(file, path);
+                    zip.ExtractFile(file, path);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning($"Failed to extract {file.FilenameInZip}: {ex.Message}.");
+                }
             }
         }
 

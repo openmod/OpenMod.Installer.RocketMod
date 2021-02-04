@@ -14,7 +14,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
 {
     public class MigratePermissionsJob : IReversibleJob
     {
-        public void ExecuteMigration()
+        public void ExecuteMigration(string[] args)
         {
             Logger.Log("Importing RocketMod permissions to OpenMod...");
 

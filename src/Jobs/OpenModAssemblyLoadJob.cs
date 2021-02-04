@@ -13,7 +13,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
         private static readonly Dictionary<string, Assembly> s_LoadedAssemblies = new Dictionary<string, Assembly>();
         private static readonly Regex s_VersionRegex = new Regex("Version=(?<version>.+?), ", RegexOptions.Compiled);
 
-        public void ExecuteMigration()
+        public void ExecuteMigration(string[] args)
         {
             Logger.Log("Loading OpenMod assemblies. Ignore the message spam below.");
             var aviEvents = new List<AssemblyLoadEventHandler>();

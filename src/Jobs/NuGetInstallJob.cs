@@ -3,6 +3,7 @@ using OpenMod.NuGet;
 using Rocket.Core.Logging;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace OpenMod.Installer.RocketMod.Jobs
@@ -17,12 +18,12 @@ namespace OpenMod.Installer.RocketMod.Jobs
             m_PackageId = packageId;
         }
 
-        public void ExecuteMigration()
+        public void ExecuteMigration(string[] args)
         {
-            AsyncHelperEx.RunSync(DownloadPackage);
+            AsyncHelperEx.RunSync(() => DownloadPackage(args.Contains("--force") || args.Contains("-f")));
         }
 
-        private async Task DownloadPackage()
+        private async Task DownloadPackage(bool force)
         {
             Logger.Log($"Installing package \"{m_PackageId}\"...");
             var nuGetPackageManager = NuGetHelper.GetNuGetPackageManager();
@@ -30,16 +31,22 @@ namespace OpenMod.Installer.RocketMod.Jobs
             const bool c_AllowPreReleaseVersion = false;
 
             var oldIdentity = await nuGetPackageManager.GetLatestPackageIdentityAsync(m_PackageId);
-            if (oldIdentity != null)
+            if (!force && oldIdentity != null)
             {
-                Logger.Log($"Package \"{m_PackageId}\" is already installed.");
+                Logger.LogWarning($"Package \"{m_PackageId}\" is already installed, skipping. Use \"openmod install -f\" to install anyway.");
                 return;
             }
 
             var package = await nuGetPackageManager.QueryPackageExactAsync(m_PackageId, null, c_AllowPreReleaseVersion);
             if (package?.Identity == null)
             {
-                Logger.Log($"Downloading has failed for {m_PackageId}: {NuGetInstallCode.PackageOrVersionNotFound}");
+                Logger.LogError($"Downloading has failed for {m_PackageId}: {NuGetInstallCode.PackageOrVersionNotFound}");
+                return;
+            }
+
+            if (oldIdentity?.Version == package.Identity.Version && package.Identity.HasVersion)
+            {
+                Logger.LogError($"Latest version of {package.Identity.Id} is already installed.");
                 return;
             }
 
