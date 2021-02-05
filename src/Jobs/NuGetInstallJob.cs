@@ -1,7 +1,6 @@
 ﻿using OpenMod.Installer.RocketMod.Helpers;
 using OpenMod.NuGet;
 using Rocket.Core.Logging;
-using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,15 +19,13 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
         public void ExecuteMigration(string[] args)
         {
-            AsyncHelperEx.RunSync(() => DownloadPackage(args.Contains("--force") || args.Contains("-f")));
+            AsyncHelperEx.RunSync(() => DownloadPackage(args.Contains("--force") || args.Contains("-f"), args.Contains("-p") || args.Contains("--pre")));
         }
 
-        private async Task DownloadPackage(bool force)
+        private async Task DownloadPackage(bool force, bool usePre)
         {
             Logger.Log($"Installing package \"{m_PackageId}\"...");
             var nuGetPackageManager = NuGetHelper.GetNuGetPackageManager();
-
-            const bool c_AllowPreReleaseVersion = false;
 
             var oldIdentity = await nuGetPackageManager.GetLatestPackageIdentityAsync(m_PackageId);
             if (!force && oldIdentity != null)
@@ -37,7 +34,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 return;
             }
 
-            var package = await nuGetPackageManager.QueryPackageExactAsync(m_PackageId, null, c_AllowPreReleaseVersion);
+            var package = await nuGetPackageManager.QueryPackageExactAsync(m_PackageId, null, usePre);
             if (package?.Identity == null)
             {
                 Logger.LogError($"Downloading has failed for {m_PackageId}: {NuGetInstallCode.PackageOrVersionNotFound}");
@@ -52,16 +49,8 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
             var identity = package.Identity;
 
-            var installResult = await nuGetPackageManager.InstallAsync(identity, c_AllowPreReleaseVersion);
-            bool isInstalled;
-            if (Enum.GetValues(typeof(NuGetInstallCode)).Length == 3) // loaded 3.0 version openmod 
-            {
-                isInstalled = (int) installResult.Code is 0 or 1; // Success / NoUpdatesFound
-            }
-            else
-            {
-                isInstalled = installResult.Code == NuGetInstallCode.Success;
-            }
+            var installResult = await nuGetPackageManager.InstallAsync(identity, usePre);
+            var isInstalled = installResult.Code == NuGetInstallCode.Success || installResult.Code == NuGetInstallCode.NoUpdatesFound;
 
             if (isInstalled)
             {
