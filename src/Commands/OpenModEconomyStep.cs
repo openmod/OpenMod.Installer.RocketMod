@@ -36,6 +36,7 @@ namespace OpenMod.Installer.RocketMod.Commands
                 case "om":
                 case "openmod":
                     Jobs.Add(new OpenModEconomyInstallJob());
+                    Jobs.Add(new UconomyMigratorInstallJob());
                     Jobs.Add(new MigrateEconomyJob());
                     return;
             }
