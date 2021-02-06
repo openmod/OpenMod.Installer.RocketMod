@@ -11,8 +11,8 @@ namespace OpenMod.Installer.RocketMod.Commands
 {
     public class CommandOpenMod : IRocketCommand
     {
-        private static readonly List<IJob> s_Jobs = new List<IJob>();
-        private static readonly List<CommandWindowInputted> s_RocketModComandWindowsDelegates = new List<CommandWindowInputted>();
+        private static readonly List<IJob> s_Jobs = new();
+        private static readonly List<CommandWindowInputted> s_RocketModComandWindowsDelegates = new();
         private static CommandStep s_CurrentStep;
         private static string[] s_Args;
         public void Execute(IRocketPlayer caller, string[] command)
@@ -65,9 +65,10 @@ namespace OpenMod.Installer.RocketMod.Commands
             RestoreRocketModConsoleInput();
         }
 
-        private void OnCommandWindowInputted(string text, ref bool shouldexecutecommand)
+        // ReSharper disable once RedundantAssignment
+        private void OnCommandWindowInputted(string text, ref bool shouldExecuteCommand)
         {
-            shouldexecutecommand = false;
+            shouldExecuteCommand = false;
             text = text.Trim();
 
             if (text.Equals("cancel", StringComparison.OrdinalIgnoreCase))

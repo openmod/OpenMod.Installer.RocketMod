@@ -11,14 +11,14 @@ namespace OpenMod.Installer.RocketMod.Commands
 
         public override string Text { get; } = "Which permissions system do you want to use?";
 
-        public override List<CommandStepChoice> Choices { get; } = new List<CommandStepChoice>
+        public override List<CommandStepChoice> Choices { get; } = new()
         {
-            new CommandStepChoice
+            new()
             {
                 Name = "RocketMod (recommended)",
                 Description = "OpenMod will use RocketMod's Permissions.config.xml for permissions."
             },
-            new CommandStepChoice
+            new()
             {
                 Name = "OpenMod",
                 Description = "RocketMod will use OpenMod's permission system. Will import existing permissions from RocketMod's Permissions.config.xml."

@@ -11,14 +11,14 @@ namespace OpenMod.Installer.RocketMod.Commands
 
         public override string Text { get; } = "Which economy system do you want to use?";
 
-        public override List<CommandStepChoice> Choices { get; } = new List<CommandStepChoice>
+        public override List<CommandStepChoice> Choices { get; } = new()
         {
-            new CommandStepChoice
+            new()
             {
                 Name = "RocketMod (recommended)",
                 Description = "OpenMod will use RocketMod Uconomy for economy."
             },
-            new CommandStepChoice
+            new()
             {
                 Name = "OpenMod",
                 Description = "RocketMod will use OpenMod's economy system. Works with plugins that use Uconomy. Will import existing data from Uconomy."
