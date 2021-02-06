@@ -10,5 +10,10 @@ namespace OpenMod.Installer.RocketMod.Helpers
         {
             AsyncContext.Run(task);
         }
+
+        public static T RunSync<T>(Func<Task<T>> task)
+        {
+            return AsyncContext.Run(task);
+        }
     }
 }

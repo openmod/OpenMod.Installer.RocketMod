@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore src/OpenMod.Installer.RocketMod.csproj
     - name: Update version
-      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ github.event.inputs.version }}</Version>#\" src/OpenMod.Installer.RocketMod.csproj"  
+      run: "sed -i \"s#<Version>0.0.0</Version>#<Version>${{ github.event.inputs.version }}</Version>#\" src/OpenMod.Installer.RocketMod.csproj"
     - name: Build
       run: dotnet build src/OpenMod.Installer.RocketMod.csproj --configuration Release --no-restore
     - name: Create Release
@@ -32,7 +32,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         tag_name: ${{ github.event.inputs.version }}
-        release_name: Release v${{ github.event.inputs.version }}
+        release_name: v${{ github.event.inputs.version }}
         draft: false
         prerelease: false      
     - name: Upload release asset
@@ -41,6 +41,6 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./src/bin/Release/netstandard2.0/OpenMod.Installer.RocketMod.dll
+        asset_path: ./src/bin/Release/net461/OpenMod.Installer.RocketMod.dll
         asset_name: OpenMod.Installer.RocketMod-v${{ github.event.inputs.version }}.dll
         asset_content_type: application/octet-stream
