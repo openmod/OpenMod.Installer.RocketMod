@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
+using OpenMod.API.Persistence;
+using OpenMod.Core.Persistence;
 
 namespace OpenMod.Installer.RocketMod.Jobs
 {
@@ -78,25 +78,20 @@ namespace OpenMod.Installer.RocketMod.Jobs
             }
 
             var apiAssembly = AssemblyHelper.GetAssembly("OpenMod.API");
-            var datastoreCreationParametersType = apiAssembly.GetType("OpenMod.API.Persistence.DataStoreCreationParameters");
             var workingDirectory = OpenModInstallerPlugin.Instance.OpenModManager.WorkingDirectory;
 
-            var @params = Activator.CreateInstance(datastoreCreationParametersType);
-            @params.SetPropertyValue("ComponentId", "OpenMod.Core");
-            @params.SetPropertyValue("Prefix", "openmod");
-            @params.SetPropertyValue("WorkingDirectory", workingDirectory);
+            var dataStoreParams = new DataStoreCreationParameters
+            {
+                ComponentId = "OpenMod.Core",
+                Prefix = "openmod",
+                WorkingDirectory = workingDirectory
+            };
 
-            var coreAssembly = AssemblyHelper.GetAssembly("OpenMod.Core");
-            var datastoreType = coreAssembly.GetType("OpenMod.Core.Persistence.YamlDataStore");
-            var ctor = datastoreType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { datastoreCreationParametersType }, null);
+            var dataStore = new YamlDataStore(dataStoreParams, null, null);
+            
+            AsyncHelperEx.RunSync(() => dataStore.SaveAsync("roles", openmodRoles));
+            AsyncHelperEx.RunSync(() => dataStore.SaveAsync("users", openmodUsers));
 
-            var dataStore = ctor.Invoke(new[] { @params });
-            var saveMethod = dataStore.GetType().GetMethod("SaveAsync", BindingFlags.Instance | BindingFlags.Public);
-            var saveMethodTaskRoles = (Task)saveMethod.Invoke(dataStore, new object[] { "roles", openmodRoles });
-            var saveMethodTaskUsers = (Task)saveMethod.Invoke(dataStore, new object[] { "users", openmodUsers });
-
-            AsyncHelperEx.RunSync(() => saveMethodTaskRoles);
-            AsyncHelperEx.RunSync(() => saveMethodTaskUsers);
             Logger.Log($"Imported {openmodRoles.Roles.Count} permission group(s) and {openmodUsers.Users.Count} player(s) from RocketMod's Permission.config.xml to OpenMod.");
         }
 
