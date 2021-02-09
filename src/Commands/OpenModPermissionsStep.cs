@@ -36,6 +36,7 @@ namespace OpenMod.Installer.RocketMod.Commands
                 case "om":
                 case "openmod":
                     Jobs.Add(new MigratePermissionsJob());
+                    Jobs.Add(new OpenModUnturnedConfigPermissionsJob("OpenMod"));
                     return;
             }
 

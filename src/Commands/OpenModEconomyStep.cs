@@ -38,6 +38,7 @@ namespace OpenMod.Installer.RocketMod.Commands
                     Jobs.Add(new OpenModEconomyInstallJob());
                     Jobs.Add(new UconomyMigratorInstallJob());
                     Jobs.Add(new MigrateEconomyJob());
+                    Jobs.Add(new OpenModUnturnedConfigEconomyJob("OpenMod_Uconomy"));
                     return;
             }
 
