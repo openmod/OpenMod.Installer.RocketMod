@@ -13,7 +13,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
         protected override string ConfigType => "Permissions System";
 
-        protected override void ModifyConfig(ref string configText)
+        protected override void TransformConfig(ref string configText)
         {
             // Regex: ^  permissionSystem:.*$
             configText = Regex.Replace(

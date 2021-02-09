@@ -37,7 +37,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 configText = reader.ReadToEnd();
             }
 
-            ModifyConfig(ref configText);
+            TransformConfig(ref configText);
 
             File.WriteAllText(openmodUnturnedYaml, configText);
 
@@ -46,6 +46,6 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
         protected abstract string ConfigType { get; }
 
-        protected abstract void ModifyConfig(ref string configText);
+        protected abstract void TransformConfig(ref string configText);
     }
 }
