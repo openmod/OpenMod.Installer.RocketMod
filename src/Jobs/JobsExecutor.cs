@@ -31,6 +31,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
 
                     jobsToExecute.Clear();
                     Logger.Log("OpenMod installation has failed. No changes were made. Please report this issue on the OpenMod discord: https://discord.gg/J9KYMaMaTN.");
+                    Logger.Log("To install OpenMod manually, visit https://openmod.github.io/openmod-docs/userdoc/installation/unturned.html.");
                     return false;
                 }
             }
