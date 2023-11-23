@@ -80,6 +80,7 @@ namespace OpenMod.Installer.RocketMod.Commands
 
             try
             {
+                Logger.Log($"Choice {text}");
                 s_CurrentStep.OnChoice(text);
                 s_CurrentStep = GetNextStep();
 

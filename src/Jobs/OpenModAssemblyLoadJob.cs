@@ -45,9 +45,9 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 }
 
                 var moduleDirectory = OpenModInstallerPlugin.Instance.OpenModManager.ModuleDirectory;
-                foreach (var dllpath in Directory.GetFiles(moduleDirectory, "*.dll", SearchOption.TopDirectoryOnly))
+                foreach (var dllPath in Directory.GetFiles(moduleDirectory, "*.dll", SearchOption.TopDirectoryOnly))
                 {
-                    var asm = Assembly.Load(File.ReadAllBytes(dllpath));
+                    var asm = Assembly.Load(File.ReadAllBytes(dllPath));
 
                     var name = GetVersionIndependentName(asm.FullName);
                     if (s_LoadedAssemblies.ContainsKey(name))
