@@ -11,14 +11,14 @@ jobs:
     name: "OpenMod Installer for RocketMod Deployment"
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       name: Checkout Repository
       with:
         fetch-depth: 0
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 5.0.100
+        dotnet-version: 7.x
     - name: Install dependencies
       run: dotnet restore src/OpenMod.Installer.RocketMod.csproj
     - name: Update version
@@ -27,14 +27,14 @@ jobs:
       run: dotnet build src/OpenMod.Installer.RocketMod.csproj --configuration Release --no-restore
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: actions/create-release@main
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         tag_name: ${{ github.event.inputs.version }}
         release_name: v${{ github.event.inputs.version }}
         draft: false
-        prerelease: false      
+        prerelease: false
     - name: Upload release asset
       uses: actions/upload-release-asset@v1
       env:
