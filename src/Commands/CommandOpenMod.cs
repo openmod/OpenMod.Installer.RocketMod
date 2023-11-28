@@ -80,6 +80,7 @@ namespace OpenMod.Installer.RocketMod.Commands
 
             try
             {
+                Logger.Log($"Choice {text}");
                 s_CurrentStep.OnChoice(text);
                 s_CurrentStep = GetNextStep();
 
@@ -200,7 +201,11 @@ namespace OpenMod.Installer.RocketMod.Commands
         public string Name { get; } = "openmod";
         public string Help { get; } = "Installs OpenMod";
         public string Syntax { get; } = "install";
-        public List<string> Aliases { get; } = new List<string>();
+
+        public List<string> Aliases { get; } = new()
+        {
+            "om"
+        };
         public List<string> Permissions { get; } = new List<string>();
     }
 }

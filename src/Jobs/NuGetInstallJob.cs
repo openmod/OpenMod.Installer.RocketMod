@@ -1,5 +1,5 @@
-﻿using OpenMod.Installer.RocketMod.Helpers;
-using OpenMod.NuGet;
+﻿using System;
+using OpenMod.Installer.RocketMod.Helpers;
 using Rocket.Core.Logging;
 using System.IO;
 using System.Linq;
@@ -37,7 +37,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
             var package = await nuGetPackageManager.QueryPackageExactAsync(m_PackageId, null, usePre);
             if (package?.Identity == null)
             {
-                Logger.LogError($"Downloading has failed for {m_PackageId}: {NuGetInstallCode.PackageOrVersionNotFound}");
+                Logger.LogError($"Downloading has failed for {m_PackageId}: PackageOrVersionNotFound");
                 return;
             }
 
@@ -50,7 +50,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
             var identity = package.Identity;
 
             var installResult = await nuGetPackageManager.InstallAsync(identity, usePre);
-            var isInstalled = installResult.Code == NuGetInstallCode.Success || installResult.Code == NuGetInstallCode.NoUpdatesFound;
+            var isInstalled = installResult.Code == 0 || installResult.Code == 1;
 
             if (isInstalled)
             {

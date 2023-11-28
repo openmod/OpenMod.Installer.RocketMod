@@ -23,7 +23,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
             {
                 WorkingDirectory = openmodDirectory,
                 LogOnChange = false
-            }, null, null);
+            }, null, null, null);
 
             if (!AsyncHelper.RunSync(() => dataStore.ExistsAsync("autoexec")))
             {

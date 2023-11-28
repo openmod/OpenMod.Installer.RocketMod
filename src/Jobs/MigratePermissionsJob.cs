@@ -87,7 +87,7 @@ namespace OpenMod.Installer.RocketMod.Jobs
                 WorkingDirectory = workingDirectory
             };
 
-            var dataStore = new YamlDataStore(dataStoreParams, null, null);
+            var dataStore = new YamlDataStore(dataStoreParams, null, null, null);
             
             AsyncHelperEx.RunSync(() => dataStore.SaveAsync("roles", openmodRoles));
             AsyncHelperEx.RunSync(() => dataStore.SaveAsync("users", openmodUsers));
